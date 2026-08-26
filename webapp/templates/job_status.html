@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Scan {{ job.id }} - GOD'S EYE{% endblock %}
+{% block head %}
+{% if job.status in ("queued", "running") %}
+<meta http-equiv="refresh" content="4">
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>Scan: {{ job.target }}</h1>
+  <p><span class="badge badge-{{ job.status }}">{{ job.status }}</span> &middot; mode: {{ job.mode }}</p>
+
+  {% if job.status in ("queued", "running") %}
+    <p class="muted">This page refreshes automatically every few seconds.</p>
+  {% elif job.status == "error" %}
+    <p class="flash flash-error">{{ job.error }}</p>
+  {% elif job.status == "done" %}
+    <p>Risk: <span class="badge risk-{{ job.risk|lower }}">{{ job.risk }}</span></p>
+    <ul class="counts-list">
+      {% for sev, n in job.counts.items() %}
+      <li><span class="badge risk-{{ sev }}">{{ sev }}</span> {{ n }}</li>
+      {% endfor %}
+    </ul>
+    <a class="btn btn-primary" href="{{ url_for('job_report', job_id=job.id) }}">View full report</a>
+  {% endif %}
+
+  <p><a href="{{ url_for('dashboard') }}">&larr; Back to scans</a></p>
+</div>
+{% endblock %}

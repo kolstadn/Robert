@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Log in - GOD'S EYE{% endblock %}
+{% block content %}
+<div class="card card-narrow">
+  <h1>GOD'S EYE</h1>
+  <p class="muted">Private access. For authorized security testing only.</p>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="username">Username</label>
+    <input id="username" name="username" type="text" autocomplete="username" required autofocus>
+
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+    <button type="submit" class="btn btn-primary">Log in</button>
+  </form>
+</div>
+{% endblock %}

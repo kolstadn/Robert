@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - GOD'S EYE{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header-row">
+    <h1>Scans</h1>
+    <a class="btn btn-primary" href="{{ url_for('new_scan') }}">New scan</a>
+  </div>
+
+  {% if not jobs %}
+  <p class="muted">No scans yet. Start one with the button above.</p>
+  {% else %}
+  <div class="table-scroll">
+    <table class="job-table">
+      <thead>
+        <tr><th>Target</th><th>Mode</th><th>Status</th><th>Risk</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for job in jobs %}
+        <tr>
+          <td data-label="Target">{{ job.target }}</td>
+          <td data-label="Mode">{{ job.mode }}</td>
+          <td data-label="Status"><span class="badge badge-{{ job.status }}">{{ job.status }}</span></td>
+          <td data-label="Risk">{% if job.risk %}<span class="badge risk-{{ job.risk|lower }}">{{ job.risk }}</span>{% else %}&mdash;{% endif %}</td>
+          <td data-label=""><a href="{{ url_for('job_status', job_id=job.id) }}">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

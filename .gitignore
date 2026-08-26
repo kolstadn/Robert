@@ -1,0 +1,43 @@
+# ── Generated outputs ──────────────────────────────────────────────────────────
+reports/
+logs/
+screenshots/
+webapp/data/reports/
+webapp/data/audit.log.jsonl
+
+# ── Python bytecode ────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ── Secrets / environment ──────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.env
+
+# ── Runtime cache ──────────────────────────────────────────────────────────────
+config/cve_cache.json
+
+# ── Build artifacts ────────────────────────────────────────────────────────────
+*.egg-info/
+dist/
+build/
+*.zip
+*.tar.gz
+*.pdf
+
+# ── Tool caches ────────────────────────────────────────────────────────────────
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── Claude Code (local session data — never commit) ───────────────────────────
+.claude/
+
+# ── OS noise ──────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+node_modules/
