@@ -1,0 +1,204 @@
+:root {
+  --bg: #0a0e1a;
+  --card: #0d1117;
+  --border: #1e2d40;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --green: #00ff88;
+  --cyan: #0ea5e9;
+  --critical: #ff4444;
+  --high: #ff8800;
+  --medium: #ffcc00;
+  --low: #3b82f6;
+  --info: #6b7280;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--green);
+  text-decoration: none;
+}
+
+.topnav { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.topnav a { color: var(--cyan); text-decoration: none; }
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.card-narrow { max-width: 380px; margin: 2rem auto; }
+
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+h1 { font-size: 1.3rem; margin-top: 0; }
+
+.muted { color: var(--muted); }
+
+label { display: block; margin: 0.9rem 0 0.3rem; font-size: 0.9rem; }
+
+input[type="text"], input[type="password"], select {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #0f1923;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+fieldset.checkbox-group {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-top: 1rem;
+  padding: 0.75rem;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+.checkbox-row input { width: 1.2rem; height: 1.2rem; margin-top: 0.15rem; flex-shrink: 0; }
+
+.attest {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--high);
+  border-radius: 8px;
+  background: rgba(255, 136, 0, 0.08);
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.2rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  min-height: 44px;
+}
+
+.btn-primary {
+  background: var(--green);
+  color: #04140c;
+  font-weight: 600;
+  margin-top: 1.2rem;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--cyan);
+  cursor: pointer;
+  font-size: 0.95rem;
+  padding: 0;
+}
+
+.inline-form { display: inline; }
+
+.flashes { list-style: none; padding: 0; margin: 0 0 1rem; }
+.flash { padding: 0.6rem 0.8rem; border-radius: 8px; margin-bottom: 0.5rem; }
+.flash-error { background: rgba(255, 68, 68, 0.15); border: 1px solid var(--critical); }
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid var(--border);
+}
+
+.badge-queued, .badge-running { color: var(--cyan); border-color: var(--cyan); }
+.badge-done { color: var(--green); border-color: var(--green); }
+.badge-error { color: var(--critical); border-color: var(--critical); }
+
+.risk-critical { color: var(--critical); border-color: var(--critical); }
+.risk-high { color: var(--high); border-color: var(--high); }
+.risk-medium { color: var(--medium); border-color: var(--medium); }
+.risk-low { color: var(--low); border-color: var(--low); }
+.risk-info, .risk-none { color: var(--info); border-color: var(--info); }
+
+.counts-list { list-style: none; padding: 0; display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+.table-scroll { overflow-x: auto; }
+table.job-table { width: 100%; border-collapse: collapse; }
+table.job-table th, table.job-table td {
+  text-align: left;
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.8rem;
+  padding: 1.5rem 1rem;
+}
+
+/* Mobile: stack the job table into cards instead of horizontal scroll */
+@media (max-width: 560px) {
+  table.job-table thead { display: none; }
+  table.job-table, table.job-table tbody, table.job-table tr, table.job-table td {
+    display: block;
+    width: 100%;
+  }
+  table.job-table tr {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 0.6rem;
+    padding: 0.4rem 0.6rem;
+  }
+  table.job-table td {
+    border-bottom: none;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.3rem 0;
+  }
+  table.job-table td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+}

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}GOD'S EYE{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% block head %}{% endblock %}
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="{{ url_for('dashboard') if session.get('user') else url_for('login') }}">GOD'S EYE</a>
+  {% if session.get('user') %}
+  <nav class="topnav">
+    <a href="{{ url_for('new_scan') }}">New scan</a>
+    <form action="{{ url_for('logout') }}" method="post" class="inline-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="link-btn" type="submit">Log out ({{ session['user'] }})</button>
+    </form>
+  </nav>
+  {% endif %}
+</header>
+<main class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul class="flashes">
+        {% for category, message in messages %}
+          <li class="flash flash-{{ category }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+<footer class="footer">
+  <p>For authorized security testing only. Every scan requires an authorization attestation.</p>
+</footer>
+</body>
+</html>

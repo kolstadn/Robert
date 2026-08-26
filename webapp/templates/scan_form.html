@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}New scan - GOD'S EYE{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>New scan</h1>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <label for="target">Target (hostname or IP)</label>
+    <input id="target" name="target" type="text" placeholder="example.com" required
+           value="{{ form.get('target', '') }}">
+
+    <label for="mode">Mode</label>
+    <select id="mode" name="mode">
+      <option value="pentest" {{ 'selected' if form.get('mode', 'pentest') == 'pentest' }}>Pentest</option>
+      <option value="redteam" {{ 'selected' if form.get('mode') == 'redteam' }}>Red team</option>
+    </select>
+
+    <fieldset class="checkbox-group">
+      <legend>Options</legend>
+      <label class="checkbox-row">
+        <input type="checkbox" name="stealth" {{ 'checked' if form.get('stealth') }}>
+        Stealth mode (slower, randomised delays and user agents)
+      </label>
+      <label class="checkbox-row">
+        <input type="checkbox" name="subdomains" {{ 'checked' if form.get('subdomains') }}>
+        Subdomain enumeration
+      </label>
+      <label class="checkbox-row">
+        <input type="checkbox" name="dirbrute" {{ 'checked' if form.get('dirbrute') }}>
+        Directory brute-force
+      </label>
+      {% if ai_available %}
+      <label class="checkbox-row">
+        <input type="checkbox" name="ai" {{ 'checked' if form.get('ai') }}>
+        Claude AI executive summary
+      </label>
+      {% endif %}
+    </fieldset>
+
+    <div class="attest">
+      <label class="checkbox-row">
+        <input type="checkbox" name="authorized" required>
+        <strong>I confirm I own this target, or have explicit written authorization
+        to perform security testing against it.</strong>
+      </label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Start scan</button>
+  </form>
+</div>
+{% endblock %}
