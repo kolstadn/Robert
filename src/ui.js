@@ -286,7 +286,12 @@
   }
   function bind(id, fn) { $(id).addEventListener('click', function () { TB.sfx('ui'); fn(); }); }
   bind('bContinue', function () { hideAll(); TB.Game.continueGame(); afterStart(); });
-  bind('bNew', function () { if (TB.hasSave() && !confirm('Start a new game? This erases your saved progress.')) return; buildCards(); show('sSelect'); });
+  var newArmed = 0;
+  bind('bNew', function () {
+    var b = $('bNew');
+    if (TB.hasSave() && !newArmed) { newArmed = 1; b.textContent = 'Erase save and start? Press again'; setTimeout(function () { newArmed = 0; b.textContent = 'New Game'; }, 4000); return; }
+    newArmed = 0; b.textContent = 'New Game'; buildCards(); show('sSelect');
+  });
   bind('bSelBack', function () { show('sTitle'); });
   bind('bStages', function () { buildStages(); prevStageBack = 'sTitle'; show('sStages'); });
   bind('bStgBack', function () { show(prevStageBack); prevStageBack = 'sTitle'; });
