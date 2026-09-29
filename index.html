@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Turtle Brawl — Sewer Run (fan prototype)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root { --ink:#f4efe2; --dim:#a9a394; --panel:#12161d; --panel2:#1b212b; --line:#2f3846; --acc:#ffd23a; --blue:#4a8dff; --red:#ff5a4a; --green:#5ee08a; --cyan:#7fdcff; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; background:#07090c; color:var(--ink); font-family:"Press Start 2P","Courier New",monospace; overflow:hidden; }
+  #stage { position:fixed; inset:0; display:grid; place-items:center; }
+  #game { position:relative; width:min(100vw, 177.78vh); aspect-ratio:16/9; container-type:inline-size; background:#000; overflow:hidden; }
+  #cv { position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; image-rendering:crisp-edges; }
+  .abs { position:absolute; }
+  /* HUD */
+  #hud { position:absolute; left:1.4cqw; top:1.2cqw; width:44cqw; font-size:1.25cqw; line-height:1.5; text-shadow:0.15cqw 0.15cqw 0 #000; pointer-events:none; }
+  #hud .row { display:flex; align-items:center; gap:0.8cqw; margin-bottom:0.5cqw; }
+  #hud .name { font-size:1.5cqw; color:#8fc2ff; }
+  #hud .lv { color:var(--acc); white-space:nowrap; }
+  .bar { position:relative; height:1.5cqw; background:#000; border:0.2cqw solid #000; outline:0.2cqw solid #59606c; flex:1; }
+  .bar i { position:absolute; left:0; top:0; bottom:0; width:50%; }
+  .bar span { position:absolute; inset:0; font-size:0.95cqw; display:grid; place-items:center; color:#fff; }
+  #hpb i { background:linear-gradient(#ff7a6a,#c0382e); } #enb i { background:linear-gradient(#7fdcff,#2f8fd0); } #xpb i { background:linear-gradient(#ffe97a,#d9a521); }
+  #enb.ready { outline-color:#fff; animation:pulse 0.6s infinite alternate; }
+  @keyframes pulse { to { outline-color:var(--cyan); } }
+  .tag { white-space:nowrap; font-size:1cqw; padding:0.3cqw 0.7cqw; background:rgba(0,0,0,0.65); border:0.15cqw solid #59606c; }
+  .lab { width:2.4cqw; font-size:1cqw; color:var(--dim); }
+  #hudR { position:absolute; right:1.4cqw; top:1.2cqw; text-align:right; font-size:1.25cqw; text-shadow:0.15cqw 0.15cqw 0 #000; pointer-events:none; line-height:1.7; }
+  #scrap { color:var(--acc); font-size:1.6cqw; } #dev { color:#ff8ad8; }
+  #combo { position:absolute; right:2cqw; top:12cqw; font-size:2.6cqw; color:var(--acc); text-shadow:0.25cqw 0.25cqw 0 #000; text-align:right; pointer-events:none; opacity:0; transition:opacity .15s; }
+  #combo.on { opacity:1; }
+  #banner { position:absolute; left:0; right:0; top:22%; text-align:center; font-size:2.6cqw; text-shadow:0.3cqw 0.3cqw 0 #000; pointer-events:none; opacity:0; transition:opacity .25s; padding:0 4cqw; }
+  #banner.on { opacity:1; } #banner.good { color:var(--green); } #banner.warn { color:var(--red); }
+  #hint { position:absolute; left:50%; bottom:2.2cqw; transform:translateX(-50%); max-width:78cqw; text-align:center; font-size:1.3cqw; line-height:1.6; padding:0.8cqw 1.4cqw; background:rgba(0,0,0,0.72); border:0.2cqw solid #59606c; opacity:0; transition:opacity .3s; pointer-events:none; }
+  #hint.on { opacity:1; }
+  #lvl { position:absolute; left:50%; top:9%; transform:translateX(-50%); width:52cqw; padding:1.3cqw 1.8cqw; background:rgba(10,14,22,0.92); border:0.3cqw solid var(--acc); text-align:center; opacity:0; pointer-events:none; transition:opacity .3s; }
+  #lvl.on { opacity:1; } #lvl h3 { margin:0 0 0.8cqw; font-size:2cqw; color:var(--acc); } #lvl p { margin:0.3cqw 0; font-size:1.2cqw; line-height:1.6; } #lvl b { color:var(--cyan); }
+  /* screens */
+  .screen { position:absolute; inset:0; display:none; place-items:center; background:rgba(4,6,10,0.78); z-index:5; }
+  .screen.on { display:grid; }
+  .panel { background:var(--panel); border:0.3cqw solid var(--line); box-shadow:0 0 0 0.3cqw #000, 0 1.5cqw 4cqw rgba(0,0,0,.6); padding:2cqw 2.4cqw; max-width:94cqw; max-height:94%; overflow:auto; font-size:1.2cqw; line-height:1.7; }
+  .panel h1 { margin:0 0 0.6cqw; font-size:4cqw; color:var(--acc); letter-spacing:0.1cqw; text-shadow:0.3cqw 0.3cqw 0 #6a3a00; }
+  .panel h2 { margin:0 0 1cqw; font-size:1.9cqw; color:var(--acc); display:flex; justify-content:space-between; gap:2cqw; }
+  .panel h3 { margin:1.2cqw 0 0.5cqw; font-size:1.3cqw; color:var(--cyan); }
+  .panel p { margin:0.5cqw 0; } .dim { color:var(--dim); } .sub { color:var(--dim); font-size:1.1cqw; margin-bottom:1.4cqw; }
+  button { font:inherit; font-size:1.25cqw; color:var(--ink); background:var(--panel2); border:0.2cqw solid #59606c; padding:0.8cqw 1.3cqw; cursor:pointer; text-align:left; }
+  button:hover:not(:disabled), button:focus-visible { border-color:var(--acc); outline:none; background:#252d3a; }
+  button:disabled { opacity:0.45; cursor:not-allowed; }
+  button.primary { background:#8a5a00; border-color:var(--acc); text-align:center; }
+  .stack { display:flex; flex-direction:column; gap:0.9cqw; min-width:30cqw; }
+  .cols { display:grid; grid-template-columns:44cqw 44cqw; gap:2.2cqw; }
+  #pv { width:100%; aspect-ratio:260/150; image-rendering:pixelated; background:radial-gradient(circle at 60% 40%,#243247,#0c1119); border:0.2cqw solid var(--line); }
+  .chips { display:grid; grid-template-columns:repeat(5,1fr); gap:0.6cqw; margin:0.8cqw 0; }
+  .chip { text-align:center; padding:0.6cqw 0.2cqw; font-size:0.95cqw; line-height:1.5; }
+  .chip.sel { border-color:var(--acc); background:#3a2f10; } .chip.owned { color:var(--green); } .chip.cur { box-shadow:inset 0 -0.35cqw 0 var(--green); }
+  .chip small { display:block; font-size:0.8cqw; color:var(--dim); }
+  .en { display:flex; align-items:center; gap:0.8cqw; width:100%; margin-bottom:0.5cqw; font-size:1.1cqw; }
+  .en .sw { width:1.6cqw; height:1.6cqw; flex:none; border:0.15cqw solid #000; }
+  .en.cur { border-color:var(--green); background:#12301f; } .en em { margin-left:auto; font-style:normal; color:var(--dim); font-size:0.95cqw; }
+  #enInfo { font-size:1.05cqw; background:#0c1016; padding:0.9cqw 1.1cqw; border:0.15cqw solid var(--line); min-height:11cqw; }
+  #enInfo b.pro { color:var(--green); } #enInfo b.con { color:var(--red); }
+  .perk { display:flex; gap:0.8cqw; font-size:1cqw; margin-bottom:0.4cqw; } .perk.got { color:var(--ink); } .perk.fut { color:#6b6f78; } .perk b { color:var(--acc); flex:none; width:4.2cqw; }
+  table.k { border-collapse:collapse; font-size:1.1cqw; } table.k td { padding:0.35cqw 1.2cqw 0.35cqw 0; } table.k td:first-child { color:var(--acc); }
+  .row2 { display:flex; gap:1cqw; margin-top:1.3cqw; flex-wrap:wrap; }
+  select, input[type=number] { font:inherit; font-size:1.1cqw; background:var(--panel2); color:var(--ink); border:0.2cqw solid #59606c; padding:0.4cqw; }
+  .devgrid { display:grid; grid-template-columns:auto auto; gap:0.7cqw 1.5cqw; align-items:center; font-size:1.1cqw; }
+  #titleBox { text-align:center; } #titleBox .stack { margin:2cqw auto 0; }
+  .lvtable { font-size:0.95cqw; border-collapse:collapse; } .lvtable td, .lvtable th { padding:0.2cqw 1cqw 0.2cqw 0; text-align:left; } .lvtable th { color:var(--dim); font-weight:normal; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div id="stage">
+ <div id="game">
+  <canvas id="cv" width="480" height="270"></canvas>
+
+  <div id="hud" class="hidden">
+    <div class="row"><span class="name" id="hName">LEONARDO</span><span class="lv" id="hLv">Lv 1</span><span class="tag" id="hWeap">Katana T1</span><span class="tag" id="hEn">Energy: None</span></div>
+    <div class="row"><span class="lab">HP</span><div class="bar" id="hpb"><i></i><span></span></div></div>
+    <div class="row"><span class="lab">EN</span><div class="bar" id="enb"><i></i><span></span></div></div>
+    <div class="row"><span class="lab">XP</span><div class="bar" id="xpb"><i></i><span></span></div></div>
+  </div>
+  <div id="hudR" class="hidden"><div id="scrap">SCRAP 0</div><div class="dim" id="stageName"></div><div class="dim">TAB upgrades · ESC pause</div><div id="dev"></div></div>
+  <div id="combo"></div>
+  <div id="banner"></div>
+  <div id="hint"></div>
+  <div id="lvl"></div>
+
+  <!-- Title -->
+  <div class="screen on" id="sTitle"><div class="panel" id="titleBox">
+    <h1>TURTLE BRAWL</h1><div class="sub">Sewer Run · fan-made playable prototype</div>
+    <div class="stack">
+      <button class="primary" id="bContinue">Continue</button>
+      <button class="primary" id="bNew">New Game</button>
+      <button id="bControls">Controls</button>
+      <button id="bDevT">Developer Testing…</button>
+    </div>
+    <p class="dim" style="margin-top:1.6cqw;font-size:0.95cqw">Leonardo · Twin Katanas · 1 stage · 5 mutants + boss<br>Unofficial fan project, not affiliated with the TMNT rights holders.</p>
+  </div></div>
+
+  <!-- Controls -->
+  <div class="screen" id="sControls"><div class="panel">
+    <h2>Controls</h2>
+    <table class="k">
+      <tr><td>Move (width &amp; depth)</td><td>Arrow keys / WASD</td></tr>
+      <tr><td>Light attack · combo</td><td>J or Z (tap repeatedly)</td></tr>
+      <tr><td>Heavy attack</td><td>K or X</td></tr>
+      <tr><td>Jump · jump attack</td><td>Space or C, then J / K in the air</td></tr>
+      <tr><td>Dodge roll (brief invincibility)</td><td>L or V</td></tr>
+      <tr><td>Energy special (costs energy)</td><td>I or B</td></tr>
+      <tr><td>Pick up can · throw · use valve</td><td>E (J throws while carrying)</td></tr>
+      <tr><td>Upgrade menu (when the area is clear)</td><td>Tab</td></tr>
+      <tr><td>Pause · Mute · Dev testing (title)</td><td>Esc · M · F2</td></tr>
+    </table>
+    <p class="dim">Tips: dodge on the flash/“!” warning, then punish. Attacks can be cancelled into a dodge or special. After a dodge, a heavy attack unlocks Twin Cyclone at level 6.</p>
+    <div class="row2"><button id="bCtlBack" class="primary">Back</button></div>
+  </div></div>
+
+  <!-- Pause -->
+  <div class="screen" id="sPause"><div class="panel">
+    <h2>Paused</h2>
+    <div class="stack">
+      <button class="primary" id="bResume">Resume</button>
+      <button id="bPUpg">Upgrades &amp; energies (only when no enemies are active)</button>
+      <button id="bPCtl">Controls guide</button>
+      <button id="bMute">Sound: on</button>
+      <button id="bQuit">Save &amp; quit to title</button>
+    </div>
+  </div></div>
+
+  <!-- Upgrade menu -->
+  <div class="screen" id="sUpg"><div class="panel" style="width:94cqw">
+    <h2><span id="uTitle">Upgrades</span><span id="uScrap" style="color:var(--acc)"></span></h2>
+    <div class="cols">
+      <div>
+        <canvas id="pv" width="260" height="150"></canvas>
+        <div id="pvTitle" style="color:var(--acc);margin-top:0.6cqw"></div>
+        <div id="pvLook" style="font-size:1.05cqw"></div>
+        <div id="pvStats" class="dim" style="font-size:1.05cqw"></div>
+        <div class="chips" id="chips"></div>
+        <button class="primary" id="bBuyTier" style="width:100%"></button>
+      </div>
+      <div>
+        <h3 style="margin-top:0">Energy infusion <span class="dim">(switch freely at checkpoints)</span></h3>
+        <div id="energies"></div>
+        <div id="enInfo"></div>
+        <h3>Level perks</h3>
+        <div id="perks"></div>
+      </div>
+    </div>
+    <div class="row2"><button class="primary" id="bUResume">Resume (Tab)</button><button id="bUCtl">Controls</button></div>
+  </div></div>
+
+  <!-- Game over -->
+  <div class="screen" id="sOver"><div class="panel">
+    <h2>Defeated</h2>
+    <p id="overTxt"></p>
+    <div class="row2"><button class="primary" id="bRetry">Retry from checkpoint</button><button id="bOUpg">Upgrades &amp; energies</button><button id="bOQuit">Title</button></div>
+  </div></div>
+
+  <!-- Victory -->
+  <div class="screen" id="sWin"><div class="panel">
+    <h2>Stage Clear!</h2>
+    <p id="winTxt"></p>
+    <p class="dim">This prototype ends here — the remaining turtles, energies, stages and enemies plug into the same data tables.</p>
+    <div class="row2"><button class="primary" id="bWUpg">Upgrades</button><button id="bWReplay">Replay stage</button><button id="bWQuit">Title</button></div>
+  </div></div>
+
+  <!-- Dev -->
+  <div class="screen" id="sDev"><div class="panel" style="width:80cqw">
+    <h2>Developer Testing <span class="dim" style="font-size:1cqw">preview only · never saved · XP is not accelerated</span></h2>
+    <div class="cols" style="grid-template-columns:1fr 1fr">
+      <div class="devgrid">
+        <label for="dLevel">Character level</label><select id="dLevel"></select>
+        <label for="dTier">Weapon tier</label><select id="dTier"></select>
+        <label for="dEn">Energy</label><select id="dEn"></select>
+        <label for="dEnc">Start at</label><select id="dEnc"></select>
+        <label for="dGod">Invincible</label><input type="checkbox" id="dGod">
+      </div>
+      <div id="dPace" class="dim" style="font-size:1cqw"></div>
+    </div>
+    <div class="row2"><button class="primary" id="bDevGo">Start preview</button><button id="bDevBack">Back</button></div>
+  </div></div>
+ </div>
+</div>
+<script src="src/data.js"></script>
+<script src="src/audio.js"></script>
+<script src="src/sprites.js"></script>
+<script src="src/game.js"></script>
+<script src="src/ui.js"></script>
+</body>
+</html>
