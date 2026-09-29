@@ -238,6 +238,23 @@
     if (st === 'tele' && Math.floor(t * 14) % 2) R(c, 12, -47, 18, 3, 'rgba(255,60,60,0.7)');
   };
 
+
+  E.grappler = function (c, e, t) {
+    var st = e.state, jaw = (st === 'tele' && e.atk === 'grab') || (st === 'active' && e.atk === 'grab') ? 8 : 3, walk = st === 'approach' ? Math.sin(t * 6) : 0, arm = st === 'active' && e.atk === 'grab' ? 6 : 0;
+    var tail = Math.sin(t * 2) * 2; if (e.atk === 'tail' && st === 'tele') tail = -8; if (e.atk === 'tail' && st === 'active') tail = 10;
+    if (st === 'down' || st === 'lying') { R(c, -20, -14, 36, 14, '#7a8a3a'); R(c, 16, -13, 18, 9, '#8a9a46'); R(c, -32, -8, 14, 5, '#66762e'); return; }
+    for (var i = 0; i < 7; i++) { R(c, -14 - i * 5, -14 + tail * (i / 6) + Math.sin(i * 0.6 + t * 2), 7, 9 - i, '#66762e'); }
+    R(c, -9 + Math.round(walk * 2), -12, 8, 12, '#66762e'); R(c, 2 - Math.round(walk * 2), -12, 8, 12, '#7a8a3a');
+    R(c, -11 + Math.round(walk * 2), -2, 10, 2, '#2f3a14'); R(c, 1 - Math.round(walk * 2), -2, 10, 2, '#2f3a14');
+    R(c, -13, -34, 27, 24, '#7a8a3a'); R(c, -8, -28, 18, 14, '#d0c88a'); R(c, -13, -34, 27, 3, '#8a9a46');
+    R(c, -13, -22, 27, 3, '#8a3a2a'); R(c, 4, -22, 4, 3, '#e0b83a');
+    R(c, 9, -40, 24, 8 - Math.floor(jaw / 3), '#8a9a46'); R(c, 10, -33 + jaw - 3, 21, 5, '#7a8a3a');
+    for (var k = 0; k < 5; k++) { R(c, 12 + k * 4, -33 - Math.floor(jaw / 3) + 1, 2, 2, '#fff'); R(c, 13 + k * 4, -29 + jaw - 3, 2, 2, '#fff'); }
+    R(c, 14, -43, 5, 4, '#8a9a46'); R(c, 15, -42, 3, 2, st === 'tele' ? '#ff4a3a' : '#f0e040');
+    R(c, 9 + arm, -26, 10, 6, '#7a8a3a'); R(c, 17 + arm, -27, 4, 8, '#d0c88a'); R(c, 19 + arm, -26, 3, 2, '#fff'); R(c, 19 + arm, -22, 3, 2, '#fff');
+    R(c, -13, -38, 27, 4, '#c04a2a');
+  };
+
   E.boss = function (c, e, t) {
     var st = e.state, tt = e.st, jaw = 3, tailAng = Math.sin(t * 2) * 3, arm = 0;
     if (st === 'tele' && e.atk === 'tail') { tailAng = -6 - Math.min(1, tt / 0.8) * 8; }

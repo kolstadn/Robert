@@ -37,7 +37,7 @@
   };
   ui.victory = function () {
     var S = G.S, sec = Math.round(S.playSec), m = Math.floor(sec / 60);
-    $('winTxt').innerHTML = 'Snapjaw is down and the sewer drains clear.<br>Level <b style="color:var(--acc)">' + S.level + '</b> · XP ' + Math.floor(S.xp) + ' · scrap ' + S.scrap + ' · play time ' + m + 'm ' + (sec % 60) + 's · retries ' + G.retries + '.' +
+    $('winTxt').innerHTML = 'Snapjaw is down and the sewer drains clear.<br>Level <b style="color:var(--acc)">' + S.level + '</b> · XP ' + Math.floor(S.xp) + ' · scrap ' + S.scrap + ' · defeated ' + (S.kills || 0) + ' mutants · secrets ' + (S.secrets || 0) + '/2 · play time ' + m + 'm ' + (sec % 60) + 's · retries ' + G.retries + '.' +
       (G.dev.on ? '<br><span class="dim">(Developer preview — nothing was saved.)</span>' : '');
     show('sWin');
   };

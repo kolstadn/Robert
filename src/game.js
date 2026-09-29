@@ -334,6 +334,7 @@
       case 'getup': P.vx = 0; if (P.st >= 0.25) P.state = 'free'; break;
       case 'grabbed': {
         P.vx = 0; P.vy = 0;
+        if (!G.ents.some(function (h) { return h.state === 'holding' && !h.dead; })) { P.state = 'free'; break; }
         if (consume('light') || consume('heavy') || consume('jump')) { P.mash++; spark(P.x, P.y, 25, '#fff', 3); }
         break;
       }
@@ -432,7 +433,7 @@
     TB.sfx('break_'); shake(2); spark(p.x, p.y, 10, p.type === 'barrel' ? '#3a6ea5' : '#9a6a34', 14, 110);
     G.props.splice(G.props.indexOf(p), 1);
     if (!claim(p.key)) return;
-    if (p.type === 'secret') { awardXP(TB.SECRET_XP, p.x, p.y); banner('Secret found!', 2.5, 'good'); TB.sfx('level'); for (var i = 0; i < 6; i++) G.items.push({ type: 'coin', val: 5, x: p.x + rnd(-14, 14), y: clamp(p.y + rnd(2, 16), FT, FB), seed: Math.random() * 6 }); G.items.push({ type: 'pizza', x: p.x, y: p.y + 14, seed: 1 }); return; }
+    if (p.type === 'secret') { G.S.secrets = (G.S.secrets || 0) + 1; awardXP(TB.SECRET_XP, p.x, p.y); banner('Secret found!', 2.5, 'good'); TB.sfx('level'); for (var i = 0; i < 6; i++) G.items.push({ type: 'coin', val: 5, x: p.x + rnd(-14, 14), y: clamp(p.y + rnd(2, 16), FT, FB), seed: Math.random() * 6 }); G.items.push({ type: 'pizza', x: p.x, y: p.y + 14, seed: 1 }); return; }
     var n = p.type === 'barrel' ? 2 : 3;
     for (var j = 0; j < n; j++) G.items.push({ type: 'coin', val: 2, x: p.x + rnd(-12, 12), y: clamp(p.y + rnd(-4, 8), FT, FB), seed: Math.random() * 6 });
     var roll = (parseInt(p.key.slice(1), 10) * 37 % 100) / 100;
@@ -528,6 +529,7 @@
     var d = e.def;
     TB.sfx('heavy'); shake(e.type === 'boss' ? 6 : 2); spark(e.x, e.y, e.h * 0.5, '#fff', 14, 140); G.hitstop = Math.max(G.hitstop, 0.09);
     if (claim(e.key)) {
+      G.S.kills = (G.S.kills || 0) + 1;
       awardXP(d.xp, e.x, e.y);
       var n = Math.max(1, Math.round(d.scrap / 2));
       for (var i = 0; i < n; i++) G.items.push({ type: 'coin', val: Math.ceil(d.scrap / n), x: e.x + rnd(-14, 14), y: clamp(e.y + rnd(-6, 8), FT, FB), seed: Math.random() * 6 });
@@ -545,6 +547,7 @@
     if (type === 'rat') { e.state = 'circle'; e.home = 'circle'; }
     if (type === 'bat') { e.state = 'hover'; e.home = 'rise'; e.z = 52; e.cd = rnd(1.2, 2.4); }
     if (type === 'porcupine') { e.state = 'reposition'; e.home = 'reposition'; e.burstCd = 3; }
+    if (type === 'grappler') { e.home = 'approach'; }
     if (type === 'boss') { e.state = 'intro'; e.home = 'idle'; e.cd = 1; e.phase = 1; e.lastAtk = ''; }
     return e;
   }
@@ -710,6 +713,35 @@
         if (e.st >= 0.14) setS(e, 'recover2');
         break;
       case 'recover2': e.armor = 0; e.opening = true; if (e.st >= 0.6) { e.opening = false; e.attacking = false; e.cd = rnd(1.0, 1.8); setS(e, 'approach'); } break;
+    }
+  };
+
+
+  AI.grappler = function (e, dt) {
+    var P = G.P, dx = P.x - e.x, dy = P.y - e.y;
+    function rec(d) { setS(e, 'recover'); e.recDur = d; }
+    switch (e.state) {
+      case 'approach':
+        e.armor = 1; faceP(e); moveTo(e, P.x - e.face * 38, P.y, e.def.speed, dt); e.cd -= dt;
+        if (Math.abs(dx) < 60 && Math.abs(dy) < 14 && canAttack(e)) { e.atk = Math.random() < 0.5 ? 'grab' : 'tail'; setS(e, 'tele'); e.attacking = true; e.tele = 1; TB.sfx('warn'); }
+        break;
+      case 'tele': e.armor = 1; if (e.st < 0.25) faceP(e); if (e.st >= (e.atk === 'grab' ? 0.5 : 0.65)) { setS(e, 'active'); e.did = false; e.tele = 0; TB.sfx('swing'); } break;
+      case 'active':
+        if (e.atk === 'grab') {
+          e.x += e.face * 170 * dt;
+          if (!e.did && touchP(e, 34, 13) && P.inv <= 0 && !G.dev.god && !P.dead && P.state !== 'grabbed') { e.did = true; setS(e, 'holding'); P.state = 'grabbed'; P.mash = 0; P.st = 0; P.atk = null; TB.sfx('hurt'); banner('MASH attack to break free!', 1.2, 'warn'); }
+          else if (e.st >= 0.18) rec(0.9);
+        } else {
+          if (!e.did && e.st > 0.04) { e.did = true; TB.sfx('heavy'); ring(e.x, e.y, '#cfe8a0', 58, 0.25); shake(2); if (Math.abs(P.x - e.x) < 60 && Math.abs(P.y - e.y) < 18 && P.z < 24) hurtPlayer(10, e.x, { knock: true }); }
+          if (e.st >= 0.2) rec(0.95);
+        }
+        break;
+      case 'holding':
+        e.armor = 2; P.x = e.x + e.face * 24; P.y = e.y;
+        if (P.mash >= 3) { P.state = 'free'; P.inv = 0.5; P.vx = e.face * 80; rec(0.9); banner('Broke free!', 1, 'good'); }
+        else if (e.st >= 0.9) { P.state = 'free'; P.inv = 0; hurtPlayer(14, e.x, { knock: true }); shake(3); rec(1.0); }
+        break;
+      case 'recover': e.armor = 0; e.opening = true; if (e.st >= e.recDur) { e.opening = false; e.attacking = false; e.cd = rnd(1.2, 2.2); setS(e, 'approach'); } break;
     }
   };
 

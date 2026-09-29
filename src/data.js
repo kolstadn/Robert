@@ -86,6 +86,7 @@ window.TB = window.TB || {};
     bat:      { name: 'Bat Mutant',       hp: 24,  hw: 10, h: 22, speed: 70, xp: 15, scrap: 5,  resist: { fire: 1.3, ice: 1, lightning: 1.2 } },
     porcupine:{ name: 'Porcupine Mutant', hp: 44,  hw: 12, h: 36, speed: 38, xp: 20, scrap: 6,  resist: { fire: 1.3, ice: 1, lightning: 0.5 } },
     rhino:    { name: 'Rhino Bruiser',    hp: 110, hw: 16, h: 54, speed: 34, xp: 40, scrap: 12, resist: { fire: 1, ice: 0.4, lightning: 1 } },
+    grappler: { name: 'Crocodile Grappler', hp: 76, hw: 15, h: 44, speed: 36, xp: 28, scrap: 8, resist: { fire: 1, ice: 0.7, lightning: 1 } },
     boss:     { name: 'Snapjaw, Sewer Warden', hp: 360, hw: 24, h: 62, speed: 30, xp: 160, scrap: 60, resist: { fire: 1, ice: 0.4, lightning: 1 } }
   };
   TB.CLEAR_BONUS_XP = 2;
@@ -95,11 +96,11 @@ window.TB = window.TB || {};
   /* ---------------- Stage 1: "Sewer Run" ---------------- */
   var R = function (t, s) { return [t, s]; };
   TB.STAGE = {
-    name: 'Stage 1 — Sewer Run', length: 7100,
+    name: 'Stage 1 — Sewer Run', length: 7700,
     zones: [
       { name: 'Old Sewer Main',   from: 0,    pal: 'sewer' },
       { name: 'Pump Works',       from: 3140, pal: 'pump' },
-      { name: 'Overflow Chamber', from: 5940, pal: 'chamber' }
+      { name: 'Overflow Chamber', from: 6500, pal: 'chamber' }
     ],
     encounters: [
       { id: 'e1',  x: 380,  waves: [[R('rat','R'), R('rat','R'), R('rat','L')]], hint: 'Rats surround you. Tap J to chain a combo!' },
@@ -109,20 +110,23 @@ window.TB = window.TB || {};
       { id: 'e5',  x: 2620, waves: [[R('bat','R')]], hint: 'BAT — dodge the red marker, then hit it while it is grounded. Jump attacks reach it in the air.' },
       { id: 'e6',  x: 3180, waves: [[R('bat','R'), R('bat','L')], [R('rat','R'), R('rat','L')]], cp: true },
       { id: 'e7',  x: 3740, waves: [[R('porcupine','R')]], hint: 'PORCUPINE — leave its firing line or jump the quills. Raised quills hurt if you hit it!' },
-      { id: 'e8',  x: 4300, waves: [[R('porcupine','L')], [R('rat','R'), R('rat','R'), R('rat','L')]] },
+      { id: 'g1',  x: 4300, waves: [[R('grappler','R')]], hint: 'CROCODILE — short-range grab (mash attack to break free) and a wide tail sweep. Step out and punish the recovery.' },
+      { id: 'e8',  x: 4300, waves: [[R('porcupine','L')], [R('grappler','R'), R('rat','L'), R('rat','L')]] },
       { id: 'e9',  x: 4860, waves: [[R('rhino','R')]], cp: true, hint: 'RHINO — step out of the red charge lane. It is stunned when it misses!' },
-      { id: 'e10', x: 5420, waves: [[R('rhino','L'), R('porcupine','R')]] },
+      { id: 'e10', x: 5420, waves: [[R('rhino','L'), R('porcupine','R')], [R('grappler','R'), R('bat','L')]] },
       { id: 'e11', x: 5980, waves: [[R('mantis','L'), R('bat','R')], [R('rat','R'), R('rat','R'), R('rat','L')]], valve: true, cp: true, hint: 'Clear the room, then turn the flood valve (E).' },
       { id: 'boss', x: 6560, boss: true, waves: [], hint: 'SNAPJAW — learn each warning. Attack when he is recovering.' }
     ],
     props: [
       ['crate', 700, 200], ['barrel', 760, 230], ['can', 1240, 215], ['crate', 1300, 190], ['barrel', 1330, 240],
       ['crate', 1820, 200], ['barrel', 1880, 226], ['can', 2340, 232], ['crate', 2400, 205], ['barrel', 2900, 214],
-      ['crate', 3000, 198], ['can', 3480, 200], ['crate', 3960, 190], ['barrel', 4020, 236], ['crate', 4560, 205],
-      ['can', 5100, 215], ['crate', 5180, 232], ['barrel', 5720, 200], ['crate', 5780, 226],
-      ['secret', 1130, 174], ['secret', 4640, 174]
+      ['crate', 3000, 198], ['can', 3480, 200], ['crate', 3960, 190], ['barrel', 4580, 236], ['crate', 5120, 205],
+      ['can', 5660, 215], ['crate', 5740, 232], ['barrel', 6280, 200], ['crate', 6340, 226],
+      ['secret', 1130, 174], ['crate', 4400, 205], ['barrel', 4460, 236], ['can', 4520, 214], ['crate', 6180, 200], ['barrel', 6240, 230], ['crate', 6900, 205], ['can', 6960, 232], ['secret', 5200, 174]
     ]
   };
+
+  TB.STAGE.encounters.forEach(function (e, i) { e.x = 380 + 560 * i; });
 
   /* Budget helper: total XP available in the stage (used by README table and dev panel). */
   TB.stageXPBudget = function () {
