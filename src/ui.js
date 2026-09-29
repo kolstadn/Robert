@@ -13,7 +13,7 @@
   }
 
   /* ---------- screens + keyboard focus ---------- */
-  var SCREENS = ['sTitle', 'sSelect', 'sStages', 'sControls', 'sPause', 'sUpg', 'sOver', 'sWin', 'sDev'];
+  var SCREENS = ['sIntro', 'sTitle', 'sSelect', 'sStages', 'sControls', 'sPause', 'sUpg', 'sOver', 'sWin', 'sDev'];
   function show(id) {
     SCREENS.forEach(function (s) { $(s).classList.toggle('on', s === id); });
     if (id) setTimeout(function () {
@@ -62,9 +62,7 @@
     show('sOver');
   };
   ui.victory = function (last) {
-    var S = G.S, sec = Math.round(S.playSec), m = Math.floor(sec / 60);
-    $('winTxt').innerHTML = (last ? 'The last boss is down — the prototype campaign is complete!' : TB.STAGE.name + ' cleared!') + '<br>Level <b style="color:var(--acc)">' + S.level + '</b> · XP ' + Math.floor(S.xp) + ' · scrap ' + S.scrap + ' · defeated ' + (S.kills || 0) + ' mutants · secrets ' + (S.secrets || 0) + '/4 · play time ' + m + 'm ' + (sec % 60) + 's · retries ' + G.retries + '.' +
-      (G.dev.on ? '<br><span class="dim">(Developer preview — nothing was saved.)</span>' : '');
+    fillResults(last);
     $('bWNext').style.display = last ? 'none' : '';
     show('sWin');
   };
@@ -77,8 +75,7 @@
   };
   ui.closeMenu = function () {
     stopPreview();
-    if (G.upgFromDeath) { G.upgFromDeath = false; G.state = 'dead'; show('sOver'); return; }
-    if (G.upgFromWin) { G.upgFromWin = false; G.state = 'victory'; show('sWin'); return; }
+    if (G.upgReturn) { var r = G.upgReturn; G.upgReturn = null; G.state = r.state; if (r.screen === 'sIntro') fillIntro(); show(r.screen); return; }
     hideAll(); TB.Game.setState('play');
   };
 
@@ -214,7 +211,7 @@
       c.restore();
       b.appendChild(cv);
       var d = document.createElement('div'); d.innerHTML = '<kbd>' + (i + 1) + '</kbd> <b>' + T.name + '</b><br>' + T.weaponName + '<br><small>' + T.style + '<br>HP ' + T.hp + ' · Speed ' + T.speed + '</small>'; b.appendChild(d);
-      b.onclick = function () { TB.sfx('ui'); hideAll(); TB.Game.newGame(id); afterStart(); ui.hint('Move: arrows/WASD · Attack: J · Heavy: K · Jump: Space · Dodge: L · Special: I'); };
+      b.onclick = function () { TB.sfx('ui'); hideAll(); TB.Game.newGame(id); afterStart(); };
       box.appendChild(b);
     });
   }
@@ -229,7 +226,7 @@
       box.appendChild(b);
     });
   }
-  function afterStart() { ui.banner(TB.STAGE.name, 2.4); }
+  function afterStart() { showIntro(); }
 
   /* ---------- dev panel ---------- */
   function buildDev() {
@@ -250,9 +247,39 @@
     $('dPace').innerHTML = '<b>Pacing budget</b> (' + TB.XP_PER_MIN + ' XP/min)<br>' + bud + rows + '<br>Your real level-up times (saved game): ' + log + '<br><br>Dev preview uses a throw-away copy of your save: everything you pick is unlocked and free, nothing is written to storage, and XP rates are unchanged. Arrows: ↑↓ move, ←→ change a value.';
   }
 
+  /* ---------- between-level screens ---------- */
+  var prevStageBack = 'sTitle';
+  function openUpgFrom(screen, state) { G.upgReturn = { screen: screen, state: state }; G.state = 'menu'; pvTier = G.S.tier; buildUpgrade(); show('sUpg'); startPreview(); }
+  function fillIntro() {
+    var S = G.S, T = TB.TURTLES[S.turtle], st = TB.STAGE, seen = {}, names = [];
+    st.encounters.forEach(function (e) { (e.waves || []).forEach(function (w) { w.forEach(function (x) { if (!seen[x[0]]) { seen[x[0]] = 1; names.push(TB.ENEMIES[x[0]].name); } }); }); if (e.boss) names.push('Boss: ' + TB.ENEMIES[e.boss].name); });
+    $('inTitle').textContent = st.name; $('inSub').textContent = st.encounters.length + ' encounters' + (G.encIdx > 0 ? ' · resuming at encounter ' + (G.encIdx + 1) : '');
+    $('inZones').innerHTML = st.zones.map(function (z) { return '▸ ' + z.name; }).join('<br>');
+    $('inEnemies').innerHTML = names.map(function (n) { return '▸ ' + n; }).join('<br>');
+    $('inTurtle').innerHTML = '<b style="color:var(--acc)">' + T.name + '</b> · ' + T.weaponName + ' T' + S.tier + ' ' + TB.TIER_NAMES[S.tier] + '<br>Energy: <b style="color:' + TB.glow(S.energy)[0] + '">' + TB.ENERGIES[S.energy].name + '</b><br>Level ' + S.level + ' · Scrap ' + S.scrap;
+  }
+  function showIntro() { TB.Game.setState('menu'); fillIntro(); show('sIntro'); }
+  ui.showIntro = showIntro;
+  function fmtTime(sec) { sec = Math.round(sec); return Math.floor(sec / 60) + 'm ' + (sec % 60) + 's'; }
+  function fillResults(last) {
+    var S = G.S, a = G.stageStart || { xp: 0, scrap: 0, kills: 0, secrets: 0, sec: 0, level: S.level, retries: 0 };
+    var rows = [['Time', fmtTime(S.playSec - a.sec)], ['Mutants defeated', (S.kills || 0) - a.kills], ['Secrets found', ((S.secrets || 0) - a.secrets) + ' / 2'], ['XP earned', '+' + Math.floor(S.xp - a.xp)],
+      ['Scrap earned', '+' + (S.scrap - a.scrap)], ['Level', a.level === S.level ? 'Lv ' + S.level : 'Lv ' + a.level + ' → Lv ' + S.level], ['Retries', G.retries - a.retries]];
+    var html = '<p>' + (last ? '<b style="color:var(--green)">The last boss is down — the campaign is complete!</b>' : '<b style="color:var(--green)">' + TB.STAGE.name + ' cleared!</b>') + '</p>';
+    html += '<table class="k">' + rows.map(function (r) { return '<tr><td>' + r[0] + '</td><td style="color:var(--ink)">' + r[1] + '</td></tr>'; }).join('') + '</table>';
+    var gained = []; for (var l = a.level + 1; l <= S.level; l++) if (TB.PERKS[l]) gained.push('<b>Lv ' + l + ' · ' + TB.PERKS[l].name + '</b> — ' + TB.PERKS[l].desc);
+    if (gained.length) html += '<h3>New perks</h3>' + gained.map(function (g) { return '<p style="font-size:1cqw">' + g + '</p>'; }).join('');
+    var nxt = TB.LEVEL_XP[S.level + 1]; if (nxt !== undefined) html += '<p class="dim">Next level at ' + nxt + ' XP (you have ' + Math.floor(S.xp) + ').</p>';
+    var canBuy = []; for (var t = S.tier + 1; t <= 5; t++) { if (S.level >= TB.TIER_UNLOCK_LEVEL[t] && S.scrap >= TB.TIER_COST[t]) { canBuy.push(TB.TIER_NAMES[t] + ' tier (' + TB.TIER_COST[t] + ')'); break; } }
+    TB.ENERGY_ORDER.forEach(function (k) { if (k !== 'none' && !S.unlocked[k] && S.level >= TB.ENERGIES[k].level && S.scrap >= TB.ENERGY_COST) canBuy.push(TB.ENERGIES[k].name + ' energy (' + TB.ENERGY_COST + ')'); });
+    if (canBuy.length) html += '<p style="color:var(--acc)">You can afford: ' + canBuy.join(', ') + ' — open Upgrades!</p>';
+    if (G.dev.on) html += '<p class="dim">(Developer preview — nothing was saved.)</p>';
+    $('winStats').innerHTML = html;
+  }
+
   /* ---------- wiring ---------- */
   function goTitle() {
-    stopPreview(); TB.Game.setState('title'); G.P = null; G.upgFromDeath = G.upgFromWin = false;
+    stopPreview(); TB.Game.setState('title'); G.P = null; G.upgReturn = null;
     ['hint', 'lvl', 'banner'].forEach(function (i) { $(i).classList.remove('on'); });
     var has = TB.hasSave(); $('bContinue').disabled = !has; $('bContinue').textContent = has ? 'Continue' : 'Continue (no save yet)';
     $('bStages').disabled = !has; show('sTitle');
@@ -261,8 +288,8 @@
   bind('bContinue', function () { hideAll(); TB.Game.continueGame(); afterStart(); });
   bind('bNew', function () { if (TB.hasSave() && !confirm('Start a new game? This erases your saved progress.')) return; buildCards(); show('sSelect'); });
   bind('bSelBack', function () { show('sTitle'); });
-  bind('bStages', function () { buildStages(); show('sStages'); });
-  bind('bStgBack', function () { show('sTitle'); });
+  bind('bStages', function () { buildStages(); prevStageBack = 'sTitle'; show('sStages'); });
+  bind('bStgBack', function () { show(prevStageBack); prevStageBack = 'sTitle'; });
   bind('bControls', function () { prevScreen = 'sTitle'; show('sControls'); });
   bind('bPCtl', function () { prevScreen = 'sPause'; show('sControls'); });
   bind('bUCtl', function () { prevScreen = 'sUpg'; show('sControls'); });
@@ -280,10 +307,14 @@
   bind('bQuit', function () { goTitle(); });
   bind('bUResume', function () { ui.closeMenu(); });
   bind('bRetry', function () { hideAll(); TB.Game.retry(); });
-  bind('bOUpg', function () { G.state = 'menu'; pvTier = G.S.tier; buildUpgrade(); show('sUpg'); startPreview(); G.upgFromDeath = true; });
+  bind('bOUpg', function () { openUpgFrom('sOver', 'dead'); });
   bind('bOQuit', function () { goTitle(); });
   bind('bWNext', function () { hideAll(); TB.Game.nextStage(); afterStart(); });
-  bind('bWUpg', function () { G.state = 'menu'; pvTier = G.S.tier; buildUpgrade(); show('sUpg'); startPreview(); G.upgFromWin = true; });
+  bind('bWUpg', function () { openUpgFrom('sWin', 'victory'); });
+  bind('bWStages', function () { buildStages(); prevStageBack = 'sWin'; show('sStages'); });
+  bind('bInUpg', function () { openUpgFrom('sIntro', 'menu'); });
+  bind('bInStart', function () { hideAll(); TB.Game.setState('play'); ui.banner(TB.STAGE.name, 2.4); if (TB.STAGE.encounters[0] && G.encIdx === 0) ui.hint('Move: arrows/WASD · Attack: J · Heavy: K · Jump: Space · Dodge: L · Special: I'); });
+  bind('bInQuit', function () { goTitle(); });
   bind('bWReplay', function () {
     hideAll();
     if (G.dev.on) TB.Game.devStart({ turtle: G.S.turtle, level: G.S.level, tier: G.S.tier, energy: G.S.energy, stage: G.stageIdx, enc: 0, god: G.dev.god });
@@ -311,7 +342,9 @@
       if (e.code === 'Backspace' && scr && scr.querySelector('select:focus')) return;
       if (G.state === 'play') { if (e.code === 'Escape') ui.openMenu('pause'); }
       else if (scr && scr.id === 'sControls') show(prevScreen);
-      else if (scr && (scr.id === 'sDev' || scr.id === 'sSelect' || scr.id === 'sStages')) show('sTitle');
+      else if (scr && scr.id === 'sStages') { show(prevStageBack); prevStageBack = 'sTitle'; }
+      else if (scr && (scr.id === 'sDev' || scr.id === 'sSelect')) show('sTitle');
+      else if (scr && scr.id === 'sIntro') { /* Esc does nothing; use the buttons */ }
       else if (G.state === 'menu') ui.closeMenu();
       return;
     }

@@ -187,9 +187,18 @@
   <!-- Victory -->
   <div class="screen" id="sWin"><div class="panel">
     <h2>Stage Clear!</h2>
-    <p id="winTxt"></p>
-    <p class="dim">This prototype ends here — the remaining turtles, energies, stages and enemies plug into the same data tables.</p>
-    <div class="row2"><button class="primary" id="bWNext">Next stage</button><button class="primary" id="bWUpg">Upgrades</button><button id="bWReplay">Replay stage</button><button id="bWQuit">Title</button></div>
+    <div id="winStats"></div>
+    <div class="row2"><button class="primary" id="bWNext">Continue to next stage</button><button class="primary" id="bWUpg">Upgrades &amp; switch turtle</button><button id="bWReplay">Replay stage</button><button id="bWStages">Stage select</button><button id="bWQuit">Save &amp; main menu</button></div>
+  </div></div>
+
+  <!-- Stage intro (between levels) -->
+  <div class="screen" id="sIntro"><div class="panel" style="width:70cqw">
+    <h2><span id="inTitle">Stage</span><span class="dim" style="font-size:1cqw" id="inSub"></span></h2>
+    <div class="cols" style="grid-template-columns:1fr 1fr">
+      <div><h3 style="margin-top:0">Area</h3><div id="inZones"></div><h3>Mutants ahead</h3><div id="inEnemies"></div></div>
+      <div><h3 style="margin-top:0">Your squad</h3><div id="inTurtle"></div><p class="dim" style="font-size:1cqw">Tip: press Tab in the level (when the area is clear) to change turtle, energy or upgrades.</p></div>
+    </div>
+    <div class="row2"><button class="primary" id="bInStart">Start stage</button><button id="bInUpg">Upgrades &amp; switch turtle</button><button id="bInQuit">Main menu</button></div>
   </div></div>
 
   <!-- Dev -->

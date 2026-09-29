@@ -37,6 +37,7 @@ Saves go to `localStorage` (`turtleBrawl.save.v2`). Headless smoke test (Playwri
 * **Six mutant types**, each introduced alone in stage 1: Rat Scavenger, Mantis Fighter, Bat Mutant, Porcupine Mutant, Crocodile Grappler, Rhino Bruiser — each with a different silhouette, telegraph and punish window. Max 3 melee attackers at once.
 * **Progression** — one shared XP bar and level for the team (Lv 1–8 perks: extra combo hit, +health, better dodge, faster energy, signature spin, more health/less hit-stun, stronger specials), one shared scrap pool. Rewards pay once per enemy/prop/secret, so retries keep progress but can't be farmed. No enemy scaling.
 * **Saving** — level, XP, scrap, chosen turtle, each turtle's weapon tier and energy, unlocked energies, per-stage checkpoints and claimed rewards persist. Stage Select replays cleared stages (no repeat rewards).
+* **Between-level flow** — every stage starts with an intro card (area, mutants ahead, your squad; Start / Upgrades & switch turtle / Main menu) and ends with a results screen (time, kills, secrets, XP, scrap, level-ups and new perks, what you can afford; Next stage / Upgrades & switch turtle / Replay / Stage select / Save & main menu). All keyboard-driven.
 * **Developer testing** (title screen or F2): pick turtle, level, tier, energy and any encounter; runs on a throw-away copy of your save, never saves, never accelerates XP.
 
 ## Leveling & pacing (starting targets, unvalidated)

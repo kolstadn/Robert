@@ -88,6 +88,7 @@
   function beginStage(encIdx, opts) {
     opts = opts || {};
     setStage(G.S.stage || 0); G.turtle = G.S.turtle; G.puddles = [];
+    if (!opts.retry) G.stageStart = { xp: G.S.xp, scrap: G.S.scrap, kills: G.S.kills || 0, secrets: G.S.secrets || 0, sec: G.S.playSec, level: G.S.level, retries: G.retries };
     G.encIdx = encIdx; G.arena = null; G.ents = []; G.items = []; G.proj = []; G.haz = []; G.fx = []; G.texts = []; G.trail = [];
     G.flow = { needValve: false, valve: null }; G.combo = { n: 0, t: 0 }; G.slowmo = 0; G.victory = false;
     var startX = encIdx <= 0 ? 0 : Math.max(0, STAGE.encounters[encIdx].x - 300);
@@ -1375,7 +1376,7 @@
   TB.Game.retry = function () {
     G.retries++; G.state = 'play'; var idx = G.dev.on ? G.encIdx : (G.S.checkpoints[G.stageIdx] || 0);
     if (idx < 0 || idx >= STAGE.encounters.length) idx = 0;
-    beginStage(idx);
+    beginStage(idx, { retry: true });
   };
   TB.Game.setState = function (s) { G.state = s; clearInput(); };
   TB.Game.stats = stats;
