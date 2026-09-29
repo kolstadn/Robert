@@ -73,7 +73,7 @@
 
   function setStage(i) { G.stageIdx = i; STAGE = TB.STAGES[i]; TB.STAGE = STAGE; }
   function resOf(e, en) { var r = e.def.resist[en]; return r === undefined ? 1 : r; }
-  function isBoss(e) { return isBoss(e) || e.type === 'warlord'; }
+  function isBoss(e) { return e.type === 'boss' || e.type === 'warlord'; }
 
   function spawnProps(fromX) {
     G.props = [];

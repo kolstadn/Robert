@@ -18,7 +18,7 @@
     SCREENS.forEach(function (s) { $(s).classList.toggle('on', s === id); });
     if (id) setTimeout(function () {
       var scr = $(id), f = scr.querySelector('[data-af]:not(:disabled)') || scr.querySelector('button.primary:not(:disabled)') || scr.querySelector('button:not(:disabled),select');
-      if (f) f.focus();
+      if (f) f.focus({ preventScroll: true });
     }, 0);
   }
   function hideAll() { show(null); }
@@ -134,7 +134,7 @@
     // tier chips
     var ch = $('chips'); ch.innerHTML = '';
     for (var t = 1; t <= 5; t++) (function (t) {
-      var b = document.createElement('button'), s = tierState(t); b.dataset.k = 't' + t;
+      var b = document.createElement('button'), s = tierState(t); b.dataset.k = 't' + t; if (pvTier === t) b.dataset.af = '1';
       b.className = 'chip' + (pvTier === t ? ' sel' : '') + (s === 'cur' ? ' owned cur' : s === 'owned' ? ' owned' : '');
       b.innerHTML = 'T' + t + '<br>' + TB.TIER_NAMES[t] + '<small>' + (s === 'cur' ? 'equipped' : s === 'owned' ? 'owned' : s === 'locked' ? 'Lv ' + TB.TIER_UNLOCK_LEVEL[t] : TB.TIER_COST[t] + ' scrap') + '</small>';
       b.onclick = function () { pvTier = t; TB.sfx('ui'); buildUpgrade(); };
@@ -160,7 +160,7 @@
       var p = TB.PERKS[l], d = document.createElement('div'); d.className = 'perk ' + (S.level >= l ? 'got' : 'fut');
       d.innerHTML = '<b>Lv ' + l + '</b><span><u>' + p.name + '</u> · ' + p.kind + ' — ' + p.desc + '</span>'; pk.appendChild(d);
     }
-    if (focusKey) { var f = $('sUpg').querySelector('[data-k="' + focusKey + '"]:not(:disabled)') || document.getElementById(focusKey); if (f && !f.disabled) f.focus(); else { var pr = $('bBuyTier'); if (pr && !pr.disabled) pr.focus(); else $('bUResume').focus(); } }
+    if (focusKey) { var f = $('sUpg').querySelector('[data-k="' + focusKey + '"]:not(:disabled)') || document.getElementById(focusKey); if (f && !f.disabled) f.focus({ preventScroll: true }); else { var pr = $('bBuyTier'); if (pr && !pr.disabled) pr.focus({ preventScroll: true }); else $('bUResume').focus({ preventScroll: true }); } }
   }
   function updateTierText() {
     var S = G.S, T = TB.TURTLES[S.turtle];
