@@ -66,6 +66,14 @@
   .devgrid { display:grid; grid-template-columns:auto auto; gap:0.7cqw 1.5cqw; align-items:center; font-size:1.1cqw; }
   #titleBox { text-align:center; } #titleBox .stack { margin:2cqw auto 0; }
   .lvtable { font-size:0.95cqw; border-collapse:collapse; } .lvtable td, .lvtable th { padding:0.2cqw 1cqw 0.2cqw 0; text-align:left; } .lvtable th { color:var(--dim); font-weight:normal; }
+  .card { display:flex; flex-direction:column; align-items:center; gap:0.5cqw; width:19cqw; padding:1cqw; text-align:center; font-size:1cqw; line-height:1.5; }
+  .card canvas { width:14cqw; height:14cqw; image-rendering:pixelated; background:radial-gradient(circle at 50% 60%,#243247,#0c1119); border:0.15cqw solid var(--line); }
+  .card b { font-size:1.35cqw; color:var(--acc); } .card small { color:var(--dim); font-size:0.9cqw; }
+  .trow { display:grid; grid-template-columns:repeat(4,1fr); gap:0.6cqw; margin-bottom:1cqw; }
+  .trow button { text-align:center; font-size:1cqw; padding:0.6cqw 0.3cqw; line-height:1.4; } .trow button.cur { border-color:var(--green); background:#12301f; } .trow small { display:block; font-size:0.8cqw; color:var(--dim); }
+  #bossbar { position:absolute; left:50%; bottom:2.2cqw; transform:translateX(-50%); width:50cqw; text-align:center; font-size:1.2cqw; text-shadow:0.15cqw 0.15cqw 0 #000; pointer-events:none; }
+  #bbar i { background:linear-gradient(#ff8a5a,#b02a1a); } #bossbar .bar { height:1.7cqw; }
+  kbd { font:inherit; font-size:0.95cqw; padding:0.1cqw 0.5cqw; border:0.15cqw solid #59606c; background:#0c1016; color:var(--acc); }
   .hidden { display:none !important; }
 </style>
 </head>
@@ -82,20 +90,36 @@
   </div>
   <div id="hudR" class="hidden"><div id="scrap">SCRAP 0</div><div class="dim" id="stageName"></div><div class="dim">TAB upgrades · ESC pause</div><div id="dev"></div></div>
   <div id="combo"></div>
+  <div id="bossbar" class="hidden"><div id="bossName"></div><div class="bar" id="bbar"><i></i><span></span></div></div>
   <div id="banner"></div>
   <div id="hint"></div>
   <div id="lvl"></div>
 
   <!-- Title -->
   <div class="screen on" id="sTitle"><div class="panel" id="titleBox">
-    <h1>TURTLE BRAWL</h1><div class="sub">Sewer Run · fan-made playable prototype</div>
+    <h1>TURTLE BRAWL</h1><div class="sub">Fan-made beat 'em up · keyboard controls</div>
     <div class="stack">
       <button class="primary" id="bContinue">Continue</button>
       <button class="primary" id="bNew">New Game</button>
+      <button id="bStages">Stage Select</button>
       <button id="bControls">Controls</button>
       <button id="bDevT">Developer Testing…</button>
     </div>
-    <p class="dim" style="margin-top:1.6cqw;font-size:0.95cqw">Leonardo · Twin Katanas · 1 stage · 5 mutants + boss<br>Unofficial fan project, not affiliated with the TMNT rights holders.</p>
+    <p class="dim" style="margin-top:1.6cqw;font-size:0.95cqw">4 turtles · 2 stages · 6 mutant types + 2 bosses · 6 energies<br>Menus: <kbd>↑↓←→</kbd> move · <kbd>Enter</kbd> select · <kbd>Esc</kbd> back<br>Unofficial fan project, not affiliated with the TMNT rights holders.</p>
+  </div></div>
+
+  <!-- Character select -->
+  <div class="screen" id="sSelect"><div class="panel">
+    <h2>Choose your turtle <span class="dim" style="font-size:1cqw">press 1–4 or arrows + Enter · you can switch at any safe moment with Tab</span></h2>
+    <div style="display:flex;gap:1cqw" id="cards"></div>
+    <div class="row2"><button id="bSelBack">Back</button></div>
+  </div></div>
+
+  <!-- Stage select -->
+  <div class="screen" id="sStages"><div class="panel" style="min-width:44cqw">
+    <h2>Stage select</h2>
+    <div class="stack" id="stageList"></div>
+    <div class="row2"><button id="bStgBack">Back</button></div>
   </div></div>
 
   <!-- Controls -->
@@ -109,7 +133,8 @@
       <tr><td>Dodge roll (brief invincibility)</td><td>L or V</td></tr>
       <tr><td>Energy special (costs energy)</td><td>I or B</td></tr>
       <tr><td>Pick up can · throw · use valve</td><td>E (J throws while carrying)</td></tr>
-      <tr><td>Upgrade menu (when the area is clear)</td><td>Tab</td></tr>
+      <tr><td>Upgrade menu &amp; switch turtle (area clear)</td><td>Tab, then 1–4 to pick a turtle</td></tr>
+      <tr><td>Menus</td><td>Arrow keys / WASD + Enter (or J), Esc back</td></tr>
       <tr><td>Pause · Mute · Dev testing (title)</td><td>Esc · M · F2</td></tr>
     </table>
     <p class="dim">Tips: dodge on the flash/“!” warning, then punish. Attacks can be cancelled into a dodge or special. After a dodge, a heavy attack unlocks Twin Cyclone at level 6.</p>
@@ -131,6 +156,7 @@
   <!-- Upgrade menu -->
   <div class="screen" id="sUpg"><div class="panel" style="width:94cqw">
     <h2><span id="uTitle">Upgrades</span><span id="uScrap" style="color:var(--acc)"></span></h2>
+    <div class="trow" id="trow"></div>
     <div class="cols">
       <div>
         <canvas id="pv" width="260" height="150"></canvas>
@@ -163,7 +189,7 @@
     <h2>Stage Clear!</h2>
     <p id="winTxt"></p>
     <p class="dim">This prototype ends here — the remaining turtles, energies, stages and enemies plug into the same data tables.</p>
-    <div class="row2"><button class="primary" id="bWUpg">Upgrades</button><button id="bWReplay">Replay stage</button><button id="bWQuit">Title</button></div>
+    <div class="row2"><button class="primary" id="bWNext">Next stage</button><button class="primary" id="bWUpg">Upgrades</button><button id="bWReplay">Replay stage</button><button id="bWQuit">Title</button></div>
   </div></div>
 
   <!-- Dev -->
@@ -171,6 +197,7 @@
     <h2>Developer Testing <span class="dim" style="font-size:1cqw">preview only · never saved · XP is not accelerated</span></h2>
     <div class="cols" style="grid-template-columns:1fr 1fr">
       <div class="devgrid">
+        <label for="dTurtle">Turtle</label><select id="dTurtle"></select>
         <label for="dLevel">Character level</label><select id="dLevel"></select>
         <label for="dTier">Weapon tier</label><select id="dTier"></select>
         <label for="dEn">Energy</label><select id="dEn"></select>

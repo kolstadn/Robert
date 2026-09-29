@@ -15,7 +15,20 @@
   TB.glow = function (en) { return en === 'none' ? ['#8fd0ff', '#e6f6ff', '#ffffff'] : TB.ENERGIES[en].colors; };
 
   /* =================== WEAPONS (type never changes; tier changes physical detail) =================== */
-  TB.WEAPONS = { katana: { len: [0, 27, 27, 27, 29, 32], draw: drawKatana } };
+  TB.accent = '#2f5fbf';   // set by callers to the turtle's mask colour; used for bindings
+  TB.WEAPONS = {
+    katana:   { len: [0, 27, 27, 27, 29, 32], draw: drawKatana,   idle: { r: -0.5, l: 0.55 } },
+    sai:      { len: [0, 19, 19, 19, 21, 23], draw: drawSai,      idle: { r: -0.3, l: 0.55 } },
+    bo:       { len: [0, 30, 30, 30, 32, 34], draw: drawBo,       idle: { r: -1.15, l: 0 }, single: true },
+    nunchaku: { len: [0, 24, 24, 24, 25, 26], draw: drawNunchaku, idle: { r: -0.7, l: 0.45 } }
+  };
+  function tools(c, x, y, ang) {
+    var cs = Math.cos(ang), sn = Math.sin(ang);
+    return {
+      seg: function (u0, u1, w0, w1, col) { c.fillStyle = col; for (var u = u0; u < u1; u += 0.5) for (var w = w0; w < w1; w += 0.5) c.fillRect(Math.round(x + u * cs - w * sn), Math.round(y + u * sn + w * cs), 1, 1); },
+      dot: function (u, w, col) { c.fillStyle = col; c.fillRect(Math.round(x + u * cs - w * sn), Math.round(y + u * sn + w * cs), 1, 1); }
+    };
+  }
 
   function drawKatana(c, x, y, ang, tier, en, t) {
     var cs = Math.cos(ang), sn = Math.sin(ang), ec = TB.glow(en), len = TB.WEAPONS.katana.len[tier];
@@ -61,6 +74,77 @@
       }
     }
   }
+
+  /* ---- Sai: three-pronged; tiers thicken/lengthen the prongs and add guards, glow, barbs ---- */
+  function drawSai(c, x, y, ang, tier, en, t) {
+    var k = tools(c, x, y, ang), seg = k.seg, dot = k.dot, ec = TB.glow(en), acc = TB.accent, len = TB.WEAPONS.sai.len[tier], u, q;
+    seg(-8, -1, -1, 1, '#3a2616'); for (u = -8; u < -1; u += 2) seg(u, u + 1, -1, 1, tier >= 4 ? '#e0b83a' : tier >= 2 ? acc : '#5b3d24');
+    if (tier === 1) seg(-9.5, -8, -1, 1, '#3a3a40'); else { seg(-10, -8, -1.5, 1.5, '#a0a6b0'); if (tier >= 3) dot(-9.5, 0, ec[1]); }
+    var gcol = tier >= 4 ? '#e0b83a' : tier >= 2 ? '#a0a6b0' : '#7a8590';
+    seg(-0.5, 1.5, -4, 4, gcol);
+    var pl = tier >= 4 ? 11 : tier >= 2 ? 9 : 8, pw = tier >= 2 ? 1 : 0.5;
+    for (u = 1.5; u < pl; u += 0.5) { var off = 3.5 - (u > pl - 3 ? (u - (pl - 3)) * 0.8 : 0); seg(u, u + 0.5, -off - pw, -off + pw, gcol); seg(u, u + 0.5, off - pw, off + pw, gcol); }
+    if (tier >= 5) { [pl - 4, pl - 6].forEach(function (r) { dot(r, -5, gcol); dot(r, 5, gcol); }); }
+    seg(1.5, len - 3, -0.5, 1, '#dfe8ef'); seg(1.5, len - 3, 0.5, 1, '#8a97a3');
+    if (tier >= 2) { seg(1.5, 7, -1, 1.5, '#c9d2db'); dot(9, 0, '#3a4350'); }
+    seg(len - 3, len, 0, 0.5, '#f2f6fa');
+    if (tier >= 4) for (u = 4; u < len - 3; u += 2) dot(u, -1, '#ffffff');
+    if (tier >= 3) {
+      for (u = 3; u < len - 2; u++) dot(u, 0, (Math.floor(u / 2 + t * 10)) % 3 === 0 ? ec[1] : ec[0]);
+      dot(pl - 0.5, -3.5, ec[0]); dot(pl - 0.5, 3.5, ec[0]); dot(len, 0, ec[2]);
+    }
+    if (tier >= 5) {
+      for (u = 2; u < pl; u += 2) { var h = 1 + Math.floor((Math.sin(t * 12 + u) + 1) * 1.2); for (q = 1; q <= h; q++) { dot(u, -4 - q, q === 1 ? ec[0] : ec[1]); dot(u, 4 + q, q === 1 ? ec[0] : ec[1]); } }
+      [8, 12, 16].forEach(function (r) { dot(r, 0, ec[2]); });
+    }
+  }
+
+  /* ---- Bo staff: held mid-shaft (u = -16 .. len); tiers add caps, rings, inlay, flared ends ---- */
+  function drawBo(c, x, y, ang, tier, en, t) {
+    var k = tools(c, x, y, ang), seg = k.seg, dot = k.dot, ec = TB.glow(en), acc = TB.accent, len = TB.WEAPONS.bo.len[tier], u0 = -16, u, j;
+    var th = tier >= 3 ? 1.5 : 1, wood = tier >= 4 ? '#6a3a1a' : '#8a5a2b';
+    seg(u0, len, -th, th, wood); seg(u0, len, -th, -th + 0.5, '#b5793b'); seg(u0, len, th - 0.5, th, '#5a3a1a');
+    for (u = u0 + 2; u < len; u += 5) dot(u, 0, '#5a3a1a');
+    if (tier >= 2) {
+      seg(u0, u0 + 3, -th - 0.5, th + 0.5, '#a0a6b0'); seg(len - 3, len, -th - 0.5, th + 0.5, '#a0a6b0');
+      for (u = -4; u < 4; u += 2) seg(u, u + 1, -th, th, tier >= 4 ? '#e0b83a' : acc);
+    }
+    if (tier >= 3) {
+      for (u = u0 + 4; u < len - 3; u++) { if (u > -5 && u < 5) continue; dot(u, 0, (Math.floor(u / 2 + t * 10)) % 3 === 0 ? ec[1] : ec[0]); if (tier >= 4) dot(u, -0.7, ec[0]); }
+      dot(len - 1, 0, ec[1]); dot(u0 + 1, 0, ec[1]);
+    }
+    if (tier >= 4) {
+      [-8, 8, 20].forEach(function (r) { seg(r, r + 1, -th - 0.5, th + 0.5, '#e0b83a'); });
+      dot(len, 0, '#e0b83a'); dot(len + 1, 0, '#e0b83a'); dot(u0 - 1, 0, '#e0b83a'); dot(u0 - 2, 0, '#e0b83a');
+    }
+    if (tier >= 5) {
+      seg(len - 4, len + 1, -th - 1.5, th + 1.5, '#f0cf5a'); seg(u0 - 1, u0 + 4, -th - 1.5, th + 1.5, '#f0cf5a');
+      [-11, 4, 12, 24].forEach(function (r) { dot(r, 0.5, ec[2]); });
+      for (j = 1; j < 4; j++) { var f = Math.round((Math.sin(t * 14 + j) + 1) * 1.2); dot(len + 1 + j, 0, ec[0]); if (f) dot(len + 1 + j, -1, ec[1]); dot(u0 - 2 - j, 0, ec[0]); if (f) dot(u0 - 2 - j, 1, ec[1]); }
+    }
+  }
+
+  /* ---- Nunchaku: two handles joined by a chain; the second handle swings loosely ---- */
+  function drawNunchaku(c, x, y, ang, tier, en, t) {
+    var ec = TB.glow(en), acc = TB.accent, sway = 0.9 + Math.sin(t * 9) * 0.35, a2 = ang + sway, mid = ang + sway * 0.5;
+    var ex = x + Math.cos(ang) * 12, ey = y + Math.sin(ang) * 12, p2x = ex + Math.cos(mid) * 5, p2y = ey + Math.sin(mid) * 5;
+    function handle(k, u0, u1) {
+      var seg = k.seg, dot = k.dot, u, wood = tier >= 4 ? '#7a4a1a' : '#a5703a';
+      seg(u0, u1, -1, 1, wood); seg(u0, u1, -1, -0.5, '#c99060');
+      if (tier >= 2) { seg(u1 - 1.5, u1, -1.5, 1.5, '#a0a6b0'); seg(u0, u0 + 1.5, -1.5, 1.5, '#a0a6b0'); seg(u0 + 5, u0 + 6, -1, 1, acc); }
+      if (tier >= 3) for (u = u0 + 3; u < u1 - 2; u++) dot(u, 0, (Math.floor(u / 2 + t * 10)) % 3 === 0 ? ec[1] : ec[0]);
+      if (tier >= 4) { seg(u0 + 2, u0 + 3, -1, 1, '#e0b83a'); seg(u1 - 4, u1 - 3, -1, 1, '#e0b83a'); for (u = u0 + 4; u < u1 - 4; u += 2) dot(u, 0.5, '#e0b83a'); }
+      if (tier >= 5) { [u0 + 4, u0 + 8].forEach(function (r) { dot(r, 0.5, ec[2]); dot(r, -1.5, ec[2]); }); }
+    }
+    handle(tools(c, x, y, ang), -3, 12);
+    for (var i = 0; i <= 4; i++) {
+      var cx = ex + Math.cos(mid) * i * 1.25, cy = ey + Math.sin(mid) * i * 1.25 + (i % 2 ? 0.6 : 0);
+      c.fillStyle = tier >= 5 ? ec[i % 2 ? 1 : 0] : tier >= 3 && i % 2 ? ec[0] : tier >= 2 ? '#9aa7b4' : '#cfcfcf';
+      c.fillRect(Math.round(cx), Math.round(cy), 1, 1); if (tier >= 5) c.fillRect(Math.round(cx), Math.round(cy) - 1, 1, 1);
+    }
+    handle(tools(c, p2x, p2y, a2), 0, 13);
+  }
+
   TB.weaponTip = function (weapon, tier, x, y, ang) {
     var L = TB.WEAPONS[weapon].len[tier];
     return { x: x + Math.cos(ang) * L, y: y + Math.sin(ang) * L };
@@ -108,7 +192,12 @@
     // back arm & weapon
     var sx = 3 + dx, sy = -23 + by;
     var la = s.lAng, ra = s.rAng;
-    if (s.lShow !== false) {
+    TB.accent = mask;
+    var WD = TB.WEAPONS[s.weapon];
+    if (WD.single) {   // two-handed weapon: rear hand grips the shaft behind the front hand
+      var gx = sx + Math.cos(ra) * 8 - Math.cos(ra) * 7, gy = sy + Math.sin(ra) * 8 - Math.sin(ra) * 7;
+      pline(c, sx, sy, Math.atan2(gy - sy, gx - sx), Math.max(1, Math.hypot(gx - sx, gy - sy)), 3, SKIN_D); R(c, gx - 1, gy - 1, 3, 3, SKIN_D);
+    } else if (s.lShow !== false) {
       var lx = sx + Math.cos(la) * 8, ly = sy + Math.sin(la) * 8;
       pline(c, sx, sy, la, 8, 3, SKIN_D); R(c, lx - 1, ly - 1, 3, 3, SKIN_D); wdraw(c, lx, ly, la, s.tier, s.energy, t);
     }
@@ -255,6 +344,16 @@
     R(c, -13, -38, 27, 4, '#c04a2a');
   };
 
+  E.warlord = function (c, e, t) {
+    E.rhino(c, e, t);
+    if (e.state === 'down' || e.state === 'lying') return;
+    var lean = e.state === 'charge' ? 5 : 0, g = '#d8a82a';
+    R(c, -17 + lean, -42, 34, 3, g); R(c, -6 + lean, -50, 6, 7, g); R(c, 4 + lean, -50, 6, 7, g); R(c, -2 + lean, -30, 14, 3, g);
+    R(c, -19 + lean, -47, 3, 6, '#efe8d4'); R(c, 16 + lean, -47, 3, 6, '#efe8d4'); R(c, 12 + lean, -53 + (e.state === 'charge' ? 4 : 0), 18, 3, g);
+    R(c, 20 + lean, -41 + (e.state === 'charge' ? 4 : 0), 3, 3, '#ff3a2a');
+    if (e.opening && Math.floor(t * 12) % 2) { R(c, 30, -68, 3, 3, '#ffe94a'); R(c, 22, -70, 3, 3, '#ffe94a'); }
+  };
+
   E.boss = function (c, e, t) {
     var st = e.state, tt = e.st, jaw = 3, tailAng = Math.sin(t * 2) * 3, arm = 0;
     if (st === 'tele' && e.atk === 'tail') { tailAng = -6 - Math.min(1, tt / 0.8) * 8; }
@@ -324,6 +423,8 @@
   var PAL = {
     sewer:   { dark: '#141f26', a: '#1f313a', b: '#243a44', mortar: '#0f171c', moss: '#2e5a3d', lamp: '#ffb454', water: '#1f9e74', waterHi: '#5be0a8', fA: '#2c3a40', fB: '#33444b', curb: '#4a5f66', pipe: '#3d5560' },
     pump:    { dark: '#1d1a24', a: '#2c2632', b: '#342d3a', mortar: '#15121b', moss: '#4a5a2a', lamp: '#ff9a3c', water: '#6cae2c', waterHi: '#b8ec5a', fA: '#3a3a44', fB: '#42424e', curb: '#5a5a68', pipe: '#b8652b' },
+    lab:     { dark: '#10161c', a: '#1c2733', b: '#223142', mortar: '#0b1015', moss: '#3a7a7a', lamp: '#b8f0ff', water: '#39d0b0', waterHi: '#a8fff0', fA: '#26323d', fB: '#2d3b48', curb: '#5f7f96', pipe: '#7a8a99' },
+    foundry: { dark: '#1f1512', a: '#33221b', b: '#3d2a20', mortar: '#140d0a', moss: '#7a3a1a', lamp: '#ff7a2a', water: '#e0501a', waterHi: '#ffb04a', fA: '#3a2c26', fB: '#45342c', curb: '#6a4a3a', pipe: '#8a4a2a' },
     chamber: { dark: '#0f1d2b', a: '#1a2f43', b: '#203850', mortar: '#0a141e', moss: '#2a5a5a', lamp: '#7fd8ff', water: '#2b8fd0', waterHi: '#8fe0ff', fA: '#28384a', fB: '#30435a', curb: '#4b6a8a', pipe: '#5a7a99' }
   };
   function tile(w, h, fn) { var cv = document.createElement('canvas'); cv.width = w; cv.height = h; fn(cv.getContext('2d')); return cv; }
