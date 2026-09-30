@@ -57,13 +57,17 @@ Stage 1 pays 821 XP (~13.7 min), stage 2 pays 1054 XP (~17.6 min): normal play r
 
 ## Architecture
 ```
-index.html   page + HUD/menu markup
-src/data.js  ALL tuning: turtles, tiers, energies, XP curve, perks, enemies, stages
-src/sprites.js  weapon / turtle / enemy / prop / background drawing (procedural pixel art)
-src/game.js  simulation: moves, enemy AI, bosses, energies, progression, save, render
-src/ui.js    HUD, keyboard-navigable menus, upgrade preview, dev panel
-src/audio.js procedural sfx
+index.html      page + HUD/menu markup
+src/data.js     ALL tuning: turtles, tiers, energies, XP curve, perks, enemies, stages
+src/art.js      vector-art helpers (limbs, IK, gradients, glow, shadows)
+src/world.js    pre-rendered 2x environments (5 palettes), props, items
+src/turtles.js  weapon art (4 weapons x 5 tiers) + the turtle skeleton rig
+src/enemies.js  enemy and boss sprites
+src/game.js     simulation: moves, enemy AI, bosses, energies, progression, save, render
+src/ui.js       HUD, keyboard-navigable menus, upgrade preview, dev panel
+src/audio.js    procedural sfx
 ```
+Rendering: the canvas is 960x540, drawn at 2x logical units. Characters are shaded, outlined vector art on a small skeleton (2-bone IK legs and arms, walk cycle, attack lean), weapons are drawn per tier with gradients and additive energy glow, environments are pre-rendered per zone with animated lighting, water, particles and light shafts. Gameplay runs at 1.3x simulation speed with faster base movement.
 
 ## Honest status / unfinished
 * **Pacing not validated with humans.** A scripted bot clears content far faster than a person; expect level-ups earlier than targets for skilled players. Tune `src/data.js`.

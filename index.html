@@ -10,15 +10,19 @@
   html, body { margin:0; height:100%; background:#07090c; color:var(--ink); font-family:"Press Start 2P","Courier New",monospace; overflow:hidden; }
   #stage { position:fixed; inset:0; display:grid; place-items:center; }
   #game { position:relative; width:min(100vw, 177.78vh); aspect-ratio:16/9; container-type:inline-size; background:#000; overflow:hidden; }
-  #cv { position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; image-rendering:crisp-edges; }
+  #cv { position:absolute; inset:0; width:100%; height:100%; }
   .abs { position:absolute; }
   /* HUD */
-  #hud { position:absolute; left:1.4cqw; top:1.2cqw; width:44cqw; font-size:1.25cqw; line-height:1.5; text-shadow:0.15cqw 0.15cqw 0 #000; pointer-events:none; }
+  #hud { position:absolute; left:1.4cqw; top:1.2cqw; width:47cqw; font-size:1.25cqw; line-height:1.5; text-shadow:0.15cqw 0.15cqw 0 #000; pointer-events:none; }
   #hud .row { display:flex; align-items:center; gap:0.8cqw; margin-bottom:0.5cqw; }
   #hud .name { font-size:1.5cqw; color:#8fc2ff; }
   #hud .lv { color:var(--acc); white-space:nowrap; }
-  .bar { position:relative; height:1.5cqw; background:#000; border:0.2cqw solid #000; outline:0.2cqw solid #59606c; flex:1; }
-  .bar i { position:absolute; left:0; top:0; bottom:0; width:50%; }
+  #hud { display:flex; gap:1cqw; align-items:flex-start; }
+  #hbody { flex:1; min-width:0; }
+  #hPortrait { width:7.4cqw; height:7.4cqw; flex:none; border-radius:50%; border:0.3cqw solid #ffd23a; background:radial-gradient(circle at 50% 40%,#46587a,#0c1119); box-shadow:0 0 0 0.25cqw #000, 0 0.4cqw 1.2cqw rgba(0,0,0,.6); }
+  .bar { position:relative; height:1.5cqw; background:linear-gradient(#050608,#161a20); border-radius:0.8cqw; border:0.2cqw solid #000; outline:0.2cqw solid #59606c; flex:1; overflow:hidden; }
+  .bar::after { content:''; position:absolute; left:0; right:0; top:0; height:45%; background:linear-gradient(rgba(255,255,255,.28),rgba(255,255,255,0)); pointer-events:none; border-radius:0.8cqw 0.8cqw 0 0; }
+  .bar i { position:absolute; left:0; top:0; bottom:0; width:50%; border-radius:0.8cqw; transition:width .12s linear; }
   .bar span { position:absolute; inset:0; font-size:0.95cqw; display:grid; place-items:center; color:#fff; }
   #hpb i { background:linear-gradient(#ff7a6a,#c0382e); } #enb i { background:linear-gradient(#7fdcff,#2f8fd0); } #xpb i { background:linear-gradient(#ffe97a,#d9a521); }
   #enb.ready { outline-color:#fff; animation:pulse 0.6s infinite alternate; }
@@ -49,7 +53,7 @@
   button.primary { background:#8a5a00; border-color:var(--acc); text-align:center; }
   .stack { display:flex; flex-direction:column; gap:0.9cqw; min-width:30cqw; }
   .cols { display:grid; grid-template-columns:44cqw 44cqw; gap:2.2cqw; }
-  #pv { width:100%; aspect-ratio:260/150; image-rendering:pixelated; background:radial-gradient(circle at 60% 40%,#243247,#0c1119); border:0.2cqw solid var(--line); }
+  #pv { width:100%; aspect-ratio:520/300; background:radial-gradient(circle at 60% 40%,#243247,#0c1119); border:0.2cqw solid var(--line); }
   .chips { display:grid; grid-template-columns:repeat(5,1fr); gap:0.6cqw; margin:0.8cqw 0; }
   .chip { text-align:center; padding:0.6cqw 0.2cqw; font-size:0.95cqw; line-height:1.5; }
   .chip.sel { border-color:var(--acc); background:#3a2f10; } .chip.owned { color:var(--green); } .chip.cur { box-shadow:inset 0 -0.35cqw 0 var(--green); }
@@ -67,7 +71,7 @@
   #titleBox { text-align:center; } #titleBox .stack { margin:2cqw auto 0; }
   .lvtable { font-size:0.95cqw; border-collapse:collapse; } .lvtable td, .lvtable th { padding:0.2cqw 1cqw 0.2cqw 0; text-align:left; } .lvtable th { color:var(--dim); font-weight:normal; }
   .card { display:flex; flex-direction:column; align-items:center; gap:0.5cqw; width:19cqw; padding:1cqw; text-align:center; font-size:1cqw; line-height:1.5; }
-  .card canvas { width:14cqw; height:14cqw; image-rendering:pixelated; background:radial-gradient(circle at 50% 60%,#243247,#0c1119); border:0.15cqw solid var(--line); }
+  .card canvas { width:14cqw; height:12.7cqw; background:radial-gradient(circle at 50% 60%,#243247,#0c1119); border:0.15cqw solid var(--line); }
   .card b { font-size:1.35cqw; color:var(--acc); } .card small { color:var(--dim); font-size:0.9cqw; }
   .trow { display:grid; grid-template-columns:repeat(4,1fr); gap:0.6cqw; margin-bottom:1cqw; }
   .trow button { text-align:center; font-size:1cqw; padding:0.6cqw 0.3cqw; line-height:1.4; } .trow button.cur { border-color:var(--green); background:#12301f; } .trow small { display:block; font-size:0.8cqw; color:var(--dim); }
@@ -80,14 +84,14 @@
 <body>
 <div id="stage">
  <div id="game">
-  <canvas id="cv" width="480" height="270"></canvas>
+  <canvas id="cv" width="960" height="540"></canvas>
 
-  <div id="hud" class="hidden">
+  <div id="hud" class="hidden"><canvas id="hPortrait" width="120" height="120"></canvas><div id="hbody">
     <div class="row"><span class="name" id="hName">LEONARDO</span><span class="lv" id="hLv">Lv 1</span><span class="tag" id="hWeap">Katana T1</span><span class="tag" id="hEn">Energy: None</span></div>
     <div class="row"><span class="lab">HP</span><div class="bar" id="hpb"><i></i><span></span></div></div>
     <div class="row"><span class="lab">EN</span><div class="bar" id="enb"><i></i><span></span></div></div>
     <div class="row"><span class="lab">XP</span><div class="bar" id="xpb"><i></i><span></span></div></div>
-  </div>
+  </div></div>
   <div id="hudR" class="hidden"><div id="scrap">SCRAP 0</div><div class="dim" id="stageName"></div><div class="dim">TAB upgrades · ESC pause</div><div id="dev"></div></div>
   <div id="combo"></div>
   <div id="bossbar" class="hidden"><div id="bossName"></div><div class="bar" id="bbar"><i></i><span></span></div></div>
@@ -159,7 +163,7 @@
     <div class="trow" id="trow"></div>
     <div class="cols">
       <div>
-        <canvas id="pv" width="260" height="150"></canvas>
+        <canvas id="pv" width="520" height="300"></canvas>
         <div id="pvTitle" style="color:var(--acc);margin-top:0.6cqw"></div>
         <div id="pvLook" style="font-size:1.05cqw"></div>
         <div id="pvStats" class="dim" style="font-size:1.05cqw"></div>
@@ -221,7 +225,10 @@
 </div>
 <script src="src/data.js"></script>
 <script src="src/audio.js"></script>
-<script src="src/sprites.js"></script>
+<script src="src/art.js"></script>
+<script src="src/world.js"></script>
+<script src="src/turtles.js"></script>
+<script src="src/enemies.js"></script>
 <script src="src/game.js"></script>
 <script src="src/ui.js"></script>
 </body>

@@ -85,6 +85,11 @@
     $('hud').classList.toggle('hidden', !showHud); $('hudR').classList.toggle('hidden', !showHud);
     if (!showHud || !G.P) { $('bossbar').classList.add('hidden'); return; }
     var P = G.P, S = G.S, st = TB.Game.stats(), xi = TB.Game.xpInfo(), T = TB.TURTLES[S.turtle], E = TB.ENERGIES[S.energy];
+    if (cache.portrait !== S.turtle) {
+      cache.portrait = S.turtle; var pc = $('hPortrait').getContext('2d'); pc.setTransform(1, 0, 0, 1, 0, 0); pc.clearRect(0, 0, 120, 120);
+      pc.save(); pc.beginPath(); pc.arc(60, 60, 58, 0, TB.TAU); pc.clip(); pc.scale(4, 4);
+      TB.drawTurtle(pc, { x: 14, y: 76, face: 1, pose: 'idle', t: 0.3, id: S.turtle, weapon: T.weapon, tier: 1, energy: 'none', mask: T.mask, maskDark: T.maskDark, rAng: 0.6, lAng: 0.8, carry: false }); pc.restore();
+    }
     setTxt('hName', T.name.toUpperCase()); setTxt('hLv', 'Lv ' + S.level);
     setTxt('hWeap', T.weaponName + ' T' + S.tier + ' · ' + TB.TIER_NAMES[S.tier]);
     setTxt('hEn', 'Energy: ' + E.name);
@@ -182,16 +187,17 @@
   function stopPreview() { if (pvRAF) cancelAnimationFrame(pvRAF); pvRAF = 0; }
   function drawPreview() {
     var cv = $('pv'), c = cv.getContext('2d'), S = G.S, T = TB.TURTLES[S.turtle], WD = TB.WEAPONS[T.weapon];
-    c.imageSmoothingEnabled = false; c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, 260, 150);
-    c.fillStyle = 'rgba(255,255,255,0.05)'; c.fillRect(0, 130, 260, 1);
-    c.save(); c.scale(3, 3);
-    TB.drawShadow(c, 32, 43, 10, 0.4);
-    TB.drawTurtle(c, { x: 32, y: 42, face: 1, pose: 'idle', t: pvT, weapon: T.weapon, tier: pvTier, energy: S.energy, mask: T.mask, maskDark: T.maskDark, rAng: WD.idle.r + Math.sin(pvT * 2) * 0.05, lAng: WD.idle.l, carry: false });
+    c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, 520, 300);
+    c.fillStyle = TB.rg(c, 330, 120, 10, 330, [[0, 'rgba(120,150,190,0.25)'], [1, 'rgba(0,0,0,0)']]); c.fillRect(0, 0, 520, 300);
+    c.fillStyle = 'rgba(255,255,255,0.06)'; c.fillRect(0, 282, 520, 1);
+    c.save(); c.scale(2.4, 2.4);
+    TB.drawShadow(c, 50, 118, 17, 0.5);
+    TB.drawTurtle(c, { x: 50, y: 116, face: 1, pose: 'idle', t: pvT, id: S.turtle, weapon: T.weapon, tier: pvTier, energy: S.energy, mask: T.mask, maskDark: T.maskDark, rAng: WD.idle.r + Math.sin(pvT * 2) * 0.04, lAng: WD.idle.l, carry: false });
     c.restore();
-    c.save(); c.scale(3.3, 3.3); TB.accent = T.mask;
-    var sway = Math.sin(pvT * 1.5) * 0.03;
-    if (WD.single) WD.draw(c, 44, 30, -0.6 + sway, pvTier, S.energy, pvT);
-    else { WD.draw(c, 46, 34, -0.75 + sway, pvTier, S.energy, pvT); WD.draw(c, 70, 34, -2.39 - sway, pvTier, S.energy, pvT); }
+    c.save(); c.scale(WD.single ? 2.7 : 3.2, WD.single ? 2.7 : 3.2);
+    var sway = Math.sin(pvT * 1.5) * 0.03; TB.accent = T.mask; TB.nSway = undefined;
+    if (WD.single) TB.drawWeapon(c, T.weapon, 112, 84, -0.6 + sway, pvTier, S.energy, pvT);
+    else { TB.drawWeapon(c, T.weapon, 92, 80, -0.75 + sway, pvTier, S.energy, pvT); TB.drawWeapon(c, T.weapon, 140, 80, -2.39 - sway, pvTier, S.energy, pvT); }
     c.restore();
   }
 
@@ -205,9 +211,10 @@
     var box = $('cards'); box.innerHTML = '';
     TB.TURTLE_ORDER.forEach(function (id, i) {
       var T = TB.TURTLES[id], b = document.createElement('button'), cv = document.createElement('canvas'); b.className = 'card'; b.dataset.k = id;
-      cv.width = 70; cv.height = 70; var c = cv.getContext('2d'), WD = TB.WEAPONS[T.weapon]; c.imageSmoothingEnabled = false; c.save(); c.scale(1.6, 1.6);
-      TB.drawShadow(c, 22, 43, 9, 0.4);
-      TB.drawTurtle(c, { x: 22, y: 42, face: 1, pose: 'idle', t: 0, weapon: T.weapon, tier: 2, energy: 'none', mask: T.mask, maskDark: T.maskDark, rAng: WD.idle.r, lAng: WD.idle.l, carry: false });
+      cv.width = 220; cv.height = 200; var c = cv.getContext('2d'), WD = TB.WEAPONS[T.weapon]; c.save(); c.scale(1.9, 1.9);
+      c.fillStyle = TB.rg(c, 50, 70, 5, 90, [[0, 'rgba(120,150,190,0.25)'], [1, 'rgba(0,0,0,0)']]); c.fillRect(0, 0, 120, 110);
+      TB.drawShadow(c, 40, 98, 15, 0.5);
+      TB.drawTurtle(c, { x: 40, y: 98, face: 1, pose: 'idle', t: 0.4, id: id, weapon: T.weapon, tier: 2, energy: 'none', mask: T.mask, maskDark: T.maskDark, rAng: WD.idle.r, lAng: WD.idle.l, carry: false });
       c.restore();
       b.appendChild(cv);
       var d = document.createElement('div'); d.innerHTML = '<kbd>' + (i + 1) + '</kbd> <b>' + T.name + '</b><br>' + T.weaponName + '<br><small>' + T.style + '<br>HP ' + T.hp + ' · Speed ' + T.speed + '</small>'; b.appendChild(d);

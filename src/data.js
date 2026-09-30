@@ -10,10 +10,10 @@ window.TB = window.TB || {};
 
   /* ---------------- Turtles (weapon type is permanent per turtle) ---------------- */
   TB.TURTLES = {
-    leo:   { name: 'Leonardo',     weapon: 'katana',   weaponName: 'Twin Katanas', implemented: true, style: 'Balanced speed, reach and damage', mask: '#2d63e0', maskDark: '#1f46a8', hp: 100, speed: 78, dmg: 1.0,  roll: 1.0 },
-    raph:  { name: 'Raphael',      weapon: 'sai',      weaponName: 'Twin Sai',     implemented: true, style: 'Powerful close-range attacks, aggressive combos', mask: '#d8352a', maskDark: '#9c2019', hp: 115, speed: 80, dmg: 1.1,  roll: 1.0 },
-    don:   { name: 'Donatello',    weapon: 'bo',       weaponName: 'Bo Staff',     implemented: true, style: 'Long reach, wide sweeps, strong crowd control', mask: '#8a4fd0', maskDark: '#5e2f96', hp: 100, speed: 70, dmg: 0.95, roll: 0.9 },
-    mike:  { name: 'Michelangelo', weapon: 'nunchaku', weaponName: 'Nunchaku',     implemented: true, style: 'Fast attacks, mobility, long flowing combos', mask: '#f08a1c', maskDark: '#b5620e', hp: 95,  speed: 90, dmg: 0.9,  roll: 1.25 }
+    leo:   { name: 'Leonardo',     weapon: 'katana',   weaponName: 'Twin Katanas', implemented: true, style: 'Balanced speed, reach and damage', mask: '#2d63e0', maskDark: '#1f46a8', hp: 100, speed: 98, dmg: 1.0,  roll: 1.0 },
+    raph:  { name: 'Raphael',      weapon: 'sai',      weaponName: 'Twin Sai',     implemented: true, style: 'Powerful close-range attacks, aggressive combos', mask: '#d8352a', maskDark: '#9c2019', hp: 115, speed: 100, dmg: 1.1,  roll: 1.0 },
+    don:   { name: 'Donatello',    weapon: 'bo',       weaponName: 'Bo Staff',     implemented: true, style: 'Long reach, wide sweeps, strong crowd control', mask: '#8a4fd0', maskDark: '#5e2f96', hp: 100, speed: 90, dmg: 0.95, roll: 0.9 },
+    mike:  { name: 'Michelangelo', weapon: 'nunchaku', weaponName: 'Nunchaku',     implemented: true, style: 'Fast attacks, mobility, long flowing combos', mask: '#f08a1c', maskDark: '#b5620e', hp: 95,  speed: 112, dmg: 0.9,  roll: 1.25 }
   };
   TB.TURTLE_ORDER = ['leo', 'raph', 'don', 'mike'];
 
@@ -110,14 +110,14 @@ window.TB = window.TB || {};
   /* ---------------- Enemies ---------------- */
   // resist: multiplier on energy status potency (0 = immune). Damage itself is never resisted, so any energy stays viable.
   TB.ENEMIES = {
-    rat:      { name: 'Rat Scavenger',    hp: 18,  hw: 8,  h: 16, speed: 66, xp: 8,  scrap: 3,  resist: { fire: 1, ice: 1, lightning: 1, toxic: 1.3, mystic: 1 } },
-    mantis:   { name: 'Mantis Fighter',   hp: 46,  hw: 9,  h: 40, speed: 52, xp: 20, scrap: 6,  resist: { fire: 0.6, ice: 1.3, lightning: 1, toxic: 0.7, mystic: 1 } },
-    bat:      { name: 'Bat Mutant',       hp: 24,  hw: 10, h: 22, speed: 70, xp: 15, scrap: 5,  resist: { fire: 1.3, ice: 1, lightning: 1.2, toxic: 1, mystic: 1.3 } },
-    porcupine:{ name: 'Porcupine Mutant', hp: 44,  hw: 12, h: 36, speed: 38, xp: 20, scrap: 6,  resist: { fire: 1.3, ice: 1, lightning: 0.5, toxic: 0.6, mystic: 1 } },
-    rhino:    { name: 'Rhino Bruiser',    hp: 110, hw: 16, h: 54, speed: 34, xp: 40, scrap: 12, resist: { fire: 1, ice: 0.4, lightning: 1, toxic: 1.2, mystic: 0.5 } },
-    grappler: { name: 'Crocodile Grappler', hp: 76, hw: 15, h: 44, speed: 36, xp: 28, scrap: 8, resist: { fire: 1, ice: 0.7, lightning: 1, toxic: 0.3, mystic: 1 } },
-    boss:     { name: 'Snapjaw, Sewer Warden', hp: 360, hw: 24, h: 62, speed: 30, xp: 160, scrap: 60, resist: { fire: 1, ice: 0.4, lightning: 1, toxic: 0.5, mystic: 0.5 } },
-    warlord:  { name: 'Ironhorn, Rhino Warlord', hp: 480, hw: 22, h: 62, speed: 34, xp: 240, scrap: 90, resist: { fire: 1, ice: 0.4, lightning: 1, toxic: 0.8, mystic: 0.4 } }
+    rat:      { name: 'Rat Scavenger',    hp: 18,  hw: 10,  h: 26, speed: 80, xp: 8,  scrap: 3,  resist: { fire: 1, ice: 1, lightning: 1, toxic: 1.3, mystic: 1 } },
+    mantis:   { name: 'Mantis Fighter',   hp: 46,  hw: 11,  h: 62, speed: 64, xp: 20, scrap: 6,  resist: { fire: 0.6, ice: 1.3, lightning: 1, toxic: 0.7, mystic: 1 } },
+    bat:      { name: 'Bat Mutant',       hp: 24,  hw: 12, h: 34, speed: 86, xp: 15, scrap: 5,  resist: { fire: 1.3, ice: 1, lightning: 1.2, toxic: 1, mystic: 1.3 } },
+    porcupine:{ name: 'Porcupine Mutant', hp: 44,  hw: 17, h: 52, speed: 48, xp: 20, scrap: 6,  resist: { fire: 1.3, ice: 1, lightning: 0.5, toxic: 0.6, mystic: 1 } },
+    rhino:    { name: 'Rhino Bruiser',    hp: 110, hw: 24, h: 80, speed: 42, xp: 40, scrap: 12, resist: { fire: 1, ice: 0.4, lightning: 1, toxic: 1.2, mystic: 0.5 } },
+    grappler: { name: 'Crocodile Grappler', hp: 76, hw: 19, h: 62, speed: 44, xp: 28, scrap: 8, resist: { fire: 1, ice: 0.7, lightning: 1, toxic: 0.3, mystic: 1 } },
+    boss:     { name: 'Snapjaw, Sewer Warden', hp: 360, hw: 30, h: 88, speed: 38, xp: 160, scrap: 60, resist: { fire: 1, ice: 0.4, lightning: 1, toxic: 0.5, mystic: 0.5 } },
+    warlord:  { name: 'Ironhorn, Rhino Warlord', hp: 480, hw: 28, h: 88, speed: 42, xp: 240, scrap: 90, resist: { fire: 1, ice: 0.4, lightning: 1, toxic: 0.8, mystic: 0.4 } }
   };
   TB.CLEAR_BONUS_XP = 2;
   TB.VALVE_XP = 60;
